@@ -27,7 +27,7 @@ case class Server(
 
 object Server extends oneandone.Path {
   override val path: Seq[String]               = Seq("servers")
-  val fixedInstancesPath                       = "fixed_instance_size"
+  val fixedInstancesPath                       = "fixed_instance_sizes"
   implicit lazy val serializerFormats: Formats = DefaultFormats
 
   def list()(implicit client: OneandoneClient): Seq[Server] = {
@@ -42,16 +42,16 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def listFixedInstances()(implicit client: OneandoneClient): Server = {
+  def listFixedInstances()(implicit client: OneandoneClient): Seq[FixedInstance] = {
     val response = client.get(path :+ fixedInstancesPath)
     val json     = parse(response).camelizeKeys
-    json.extract[Server]
+    json.extract[Seq[FixedInstance]]
   }
 
-  def getFixedInstances()(implicit client: OneandoneClient): Server = {
-    val response = client.get(path :+ fixedInstancesPath)
+  def getFixedInstances(id: String)(implicit client: OneandoneClient): FixedInstance = {
+    val response = client.get(path :+ fixedInstancesPath :+ id)
     val json     = parse(response).camelizeKeys
-    json.extract[Server]
+    json.extract[FixedInstance]
   }
 
   def createServer(request: Server)(implicit client: OneandoneClient): Server = {
