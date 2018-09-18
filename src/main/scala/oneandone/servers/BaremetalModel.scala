@@ -1,7 +1,7 @@
 package oneandone.servers
 
-case class FixedInstance(
+case class BaremetalModel(
     name: String,
     id: String,
-    hardware: FixedInstanceHardware
+    hardware: BaremetalHardware
 ) {}

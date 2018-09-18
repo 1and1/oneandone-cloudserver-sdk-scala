@@ -1,7 +1,7 @@
 package oneandone.servers
 
-case class Hdds(
-    id: Option[String] = None,
+case class HddModel(
+    unit: String,
     size: Double,
     isMain: Boolean
-)
+) {}

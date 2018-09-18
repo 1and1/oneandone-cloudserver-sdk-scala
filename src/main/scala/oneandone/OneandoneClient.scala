@@ -17,43 +17,22 @@ import org.json4s.CustomSerializer
 case class OneandoneClient(
     private val token: String
 ) {
-  def createRequest[U, T, S](
-      path: Seq[String],
-      queryParameters: Map[String, Seq[String]] = Map.empty
-  ) = {}
 
-//  def delete(
-//      path: Seq[String],
-//      maybeMessage: Option[JValue] = None,
-//      queryParameters: Map[String, Seq[String]] = Map.empty
-//  )(implicit ec: ExecutionContext): Future[Unit] = {
-//    val request = createRequest(path, queryParameters).setMethod("DELETE")
-//
-//    for {
-//      message <- maybeMessage
-//    } {
-//      val messageBody = JsonMethods.compact(JsonMethods.render(message.snakizeKeys))
-//      request.setBody(messageBody)
-//    }
-//
-//    for {
-//      response <- client.executeRequest(request)
-//    } yield {
-//      if (response.getStatusCode >= 300) {
-//        throw OneandoneClientException(response)
-//      }
-//    }
-//  }
-
-  implicit val backend = HttpURLConnectionBackend()
-  val contentType      = "application/json; charset=utf-8"
+  implicit val backend    = HttpURLConnectionBackend()
+  val contentType         = "application/json; charset=utf-8"
+  var applicationJsonType = "application/json"
 
   def get[T: Manifest](
       path: Seq[String],
-      queryParameters: Map[String, Seq[String]] = Map.empty
+      queryParameters: Map[String, String] = Map.empty
   ): String = {
     var fullPath = OneandoneClient.host
     for (part <- path) fullPath += ("/" + part)
+    if (queryParameters.size > 0) {
+      fullPath += "?"
+      for (param <- queryParameters) fullPath += (param._1 + "=" + param._2 + "&")
+    }
+
     val request = sttp
       .header("X-Token", token)
       .header("Content-Type", contentType)
@@ -76,6 +55,8 @@ case class OneandoneClient(
     for (part <- path) fullPath += ("/" + part)
     val messageBody = JsonMethods.compact(JsonMethods.render(message.snakizeKeys))
     val request = sttp
+      .header("X-Token", token)
+      .header("Content-Type", applicationJsonType)
       .post(uri"$fullPath")
       .body(messageBody)
     val response = request.send()
@@ -87,25 +68,26 @@ case class OneandoneClient(
     }
 
   }
-//
-//  def postWithEmptyResponse(
-//      path: Seq[String],
-//      message: JValue,
-//      queryParameters: Map[String, Seq[String]] = Map.empty
-//  )(implicit ec: ExecutionContext): Future[Unit] = {
-//    val messageBody = JsonMethods.compact(JsonMethods.render(message.snakizeKeys))
-//    val request =
-//      client.executeRequest(createRequest(path = path).setBody(messageBody).setMethod("POST"))
-//
-//    for {
-//      response <- request
-//    } yield {
-//      if (response.getStatusCode != 204) {
-//        throw OneandoneClientException(response)
-//      }
-//    }
-//  }
-//
+
+  def delete(
+      path: Seq[String],
+      maybeMessage: Option[JValue] = None
+  ): String = {
+    var fullPath = OneandoneClient.host
+    for (part <- path) fullPath += ("/" + part)
+    val request = sttp
+      .header("X-Token", token)
+      .header("Content-Type", applicationJsonType)
+      .delete(uri"$fullPath")
+    val response = request.send()
+    if (response.isSuccess) {
+      response.body.right.get
+    } else {
+      //error handling
+      throw new Exception(response.body.left.get)
+    }
+  }
+
 //  def put[T: Manifest](
 //      path: Seq[String],
 //      message: JValue,
