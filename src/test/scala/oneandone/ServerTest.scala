@@ -15,7 +15,7 @@ class ServerTest extends FunSuite {
   test("Create fixed instance server") {
 
     var request = ServerRequest(
-      "fixed sizescala test11",
+      "fixed sizescala testBB",
       Some("desc"),
       Hardware(
         None,
@@ -32,7 +32,7 @@ class ServerTest extends FunSuite {
   test("Create custom hardware server") {
 
     var request = ServerRequest(
-      "custom scala test1",
+      "custom scala testBB",
       Some("desc"),
       Hardware(
         None,
@@ -53,7 +53,7 @@ class ServerTest extends FunSuite {
   }
 
   test("Modify server information") {
-    val updatedName    = "custom server updated name1xxx"
+    val updatedName    = "custom server updated name"
     var modifiedServer = Server.modifyServerInformation(customServer.id, updatedName, updatedName)
     Server.waitServerStatus(customServer.id, "POWERED_ON")
     assert(modifiedServer.name == updatedName)
@@ -145,21 +145,21 @@ class ServerTest extends FunSuite {
     var serverHdd = Server.addHddToServer(customServer.id, newHdds)
     Server.waitServerStatus(customServer.id, "POWERED_ON")
     serverHdd = Server.get(customServer.id)
-    assert(serverHdd.hardware.hdds == 2)
+    assert(serverHdd.hardware.hdds.size == 2)
   }
 
   test("Resize server hdds") {
-    serverHdds = Server.getServerHdds(fixedServer.id)
+    serverHdds = Server.getServerHdds(customServer.id)
     var hddId     = serverHdds(1).id
-    var serverHdd = Server.updateServerSingleHdd(fixedServer.id, hddId.get, 120)
-    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+    var serverHdd = Server.updateServerSingleHdd(customServer.id, hddId.get, 120)
+    Server.waitServerStatus(customServer.id, "POWERED_ON")
     assert(serverHdd.hardware.hdds.size == 2)
   }
   test("Delete server hdds") {
-    serverHdds = Server.getServerHdds(fixedServer.id)
+    serverHdds = Server.getServerHdds(customServer.id)
     var hddId     = serverHdds(1).id
-    var serverHdd = Server.deleteServerSingleHdd(fixedServer.id, hddId.get)
-    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+    var serverHdd = Server.deleteServerSingleHdd(customServer.id, hddId.get)
+    Server.waitServerStatus(customServer.id, "POWERED_ON")
     assert(serverHdds.size > 0)
   }
 
@@ -177,7 +177,7 @@ class ServerTest extends FunSuite {
   }
 
   test("Stop Server again") {
-    var server = Server.updateStatus(customServer.id, "POWER_OFF", "SOFTWARE")
+    var server = Server.updateStatus(customServer.id, "POWER_OFF", "HARDWARE")
     Server.waitServerStatus(customServer.id, "POWERED_OFF")
     server = Server.get(customServer.id)
     assert(server.status.state == "POWERED_OFF")
@@ -192,7 +192,7 @@ class ServerTest extends FunSuite {
     Server.waitServerStatus(customServer.id, "POWERED_OFF")
     server = Server.get(customServer.id)
     assert(server.status.state == "POWERED_OFF")
-    assert(server.hardware.coresPerProcessor.get == 1.0)
+    assert(server.hardware.coresPerProcessor.get == 2.0)
     assert(server.hardware.ram.get == 4.0)
   }
 
@@ -244,7 +244,8 @@ class ServerTest extends FunSuite {
   }
 
   test("Assign server IPS") {
-    var server = Server.addNewIPToServer(fixedServer.id, "TCP")
+    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+    var server = Server.addNewIPToServer(fixedServer.id, "IPV4")
     Server.waitServerStatus(fixedServer.id, "POWERED_ON")
     assert(server.ips.size > 0)
   }
@@ -256,11 +257,11 @@ class ServerTest extends FunSuite {
     ip = ipData.id
     assert(ip != null)
   }
-//  var serverClone: Server = null
-//  test("Clone server") {
-//    serverClone = Server.cloneServer(fixedServer.id, CloneServerRequest(name = "cloned Server"))
-//    Server.waitServerStatus(serverClone.id, "POWERED_ON")
-//  }
+  var serverClone: Server = null
+  test("Clone server") {
+    serverClone = Server.cloneServer(fixedServer.id, CloneServerRequest(name = "cloned Server"))
+    Server.waitServerStatus(serverClone.id, "POWERED_ON")
+  }
 
   test("Delete server IPs") {
     var deleteIp = Server.deleteServerIp(fixedServer.id, ip)
@@ -271,8 +272,12 @@ class ServerTest extends FunSuite {
   //todo: add private networks and loadbalancers and firewallpoclies
 
   test("Remove Servers") {
+    Server.waitServerStatus(customServer.id, "POWERED_OFF")
     Server.delete(customServer.id)
-//    Server.delete(serverClone.id)
+    Server.waitServerStatus(serverClone.id, "POWERED_ON")
+    Server.delete(serverClone.id)
+    Thread.sleep(300000)
+    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
     Server.delete(fixedServer.id)
 
   }

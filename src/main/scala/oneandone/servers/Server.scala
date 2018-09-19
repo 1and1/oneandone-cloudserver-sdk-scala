@@ -116,8 +116,10 @@ object Server extends oneandone.Path {
     json.extract[Seq[Hdds]]
   }
 
-  def addHddToServer(id: String, request: Seq[HddRequest])(
+  def addHddToServer(id: String, requestBody: Seq[HddRequest])(
       implicit client: OneandoneClient): Server = {
+    var request =
+      ("hdds" -> requestBody)
 
     val response = client.post(path :+ id :+ hddsPath, Extraction.decompose(request).snakizeKeys)
     val json     = parse(response).camelizeKeys
@@ -349,7 +351,7 @@ object Server extends oneandone.Path {
     var response = client.get(path :+ id)
     var json     = parse(response).camelizeKeys
     var srvr     = json.extract[Server]
-    while (srvr.status.state != status) {
+    while (srvr.status.state != status || (srvr.status.percent != null && srvr.status.percent != 99)) {
       Thread.sleep(5000)
       response = client.get(path :+ id)
       json = parse(response).camelizeKeys
