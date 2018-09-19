@@ -46,10 +46,9 @@ case class OneandoneClient(
     }
   }
 
-  def post[T: Manifest](
+  def post(
       path: Seq[String],
-      message: JValue,
-      queryParameters: Map[String, Seq[String]] = Map.empty
+      message: JValue
   ): String = {
     var fullPath = OneandoneClient.host
     for (part <- path) fullPath += ("/" + part)
@@ -88,16 +87,27 @@ case class OneandoneClient(
     }
   }
 
-//  def put[T: Manifest](
-//      path: Seq[String],
-//      message: JValue,
-//      queryParameters: Map[String, Seq[String]] = Map.empty
-//  )(implicit ec: ExecutionContext): Future[T] = {
-//    val messageBody = JsonMethods.compact(JsonMethods.render(message.snakizeKeys))
-//    val request =
-//      client.executeRequest(createRequest(path = path).setBody(messageBody).setMethod("PUT"))
-//    parseResponse[T](request)
-//  }
+  def put(
+      path: Seq[String],
+      message: JValue
+  ): String = {
+    var fullPath = OneandoneClient.host
+    for (part <- path) fullPath += ("/" + part)
+    val messageBody = JsonMethods.compact(JsonMethods.render(message.snakizeKeys))
+    val request = sttp
+      .header("X-Token", token)
+      .header("Content-Type", applicationJsonType)
+      .put(uri"$fullPath")
+      .body(messageBody)
+    val response = request.send()
+    if (response.isSuccess) {
+      response.body.right.get
+    } else {
+      //error handling
+      throw new Exception(response.body.left.get)
+    }
+
+  }
 
   //todo: implemt retry in case we reach the limit
   //  /**

@@ -7,18 +7,10 @@ class ServerTest extends FunSuite {
   implicit val client                      = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
   var servers: Seq[Server]                 = Seq.empty
   var fixedInstances: Seq[FixedInstance]   = Seq.empty
-  var largeServerInstance: FixedInstance   = null
+  val largeServerInstance: String          = "B77E19E062D5818532EFF11C747BD104"
   var baremetalModels: Seq[BaremetalModel] = Seq.empty
   var customServer: Server                 = null
   var fixedServer: Server                  = null
-
-  test("List fixed instances with options ") {
-    val listQueryParams = Map("q" -> "B77E19E062D5818532EFF11C747BD104")
-    var result          = Server.listFixedInstances(listQueryParams)
-    largeServerInstance = result(0)
-    assert(largeServerInstance != null)
-
-  }
 
   test("Create fixed instance server") {
 
@@ -27,13 +19,13 @@ class ServerTest extends FunSuite {
       Some("desc"),
       Hardware(
         None,
-        Some(largeServerInstance.id),
+        Some(largeServerInstance),
       ),
       "753E3C1F859874AA74EB63B3302601F5"
     )
     fixedServer = Server.createCloud(request)
     Server.waitServerStatus(fixedServer.id, "POWERED_ON")
-    assert(fixedServer.hardware.fixedInstanceSizeId == Some(largeServerInstance.id))
+    assert(fixedServer.hardware.fixedInstanceSizeId == Some(largeServerInstance))
 
   }
 
@@ -58,6 +50,13 @@ class ServerTest extends FunSuite {
     assert(customServer.hardware.coresPerProcessor == Some(2.0))
     assert(customServer.hardware.ram == Some(2.0))
 
+  }
+
+  test("Modify server information") {
+    val updatedName    = "custom server updated name"
+    var modifiedServer = Server.modifyServerInformation(customServer.id, updatedName, updatedName)
+    Server.waitServerStatus(customServer.id, "POWERED_ON")
+    assert(modifiedServer.name == updatedName)
   }
 
   test("List Servers") {

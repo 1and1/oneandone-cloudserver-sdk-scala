@@ -5,5 +5,7 @@ case class Ips(
     ip: String,
     `type`: String,
     reverseDns: String,
+    firewallPolicy: FirewallPolicy,
+    loadBalancers: LoadBalancer,
     main: Boolean
 ) {}
