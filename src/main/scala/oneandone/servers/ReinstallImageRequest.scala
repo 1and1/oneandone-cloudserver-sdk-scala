@@ -1,7 +1,7 @@
 package oneandone.servers
 
 case class ReinstallImageRequest(
-    name: String,
+    id: String,
     password: Option[String] = None,
     sshPassword: Option[Boolean] = None,
     publicKey: Option[Seq[String]] = None,

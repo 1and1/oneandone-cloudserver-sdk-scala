@@ -18,8 +18,8 @@ case class Server(
     status: Status,
     hardware: Hardware,
     image: Image,
-    dvd: String,
-    snapshot: String,
+    dvd: Option[IdNameFields] = None,
+    snapshot: Option[Snapshots] = None,
     ips: Option[List[Ips]] = None,
     alerts: Option[String] = None,
     monitoringPolicy: Option[String] = None
@@ -117,11 +117,11 @@ object Server extends oneandone.Path {
   }
 
   def addHddToServer(id: String, request: Seq[HddRequest])(
-      implicit client: OneandoneClient): Seq[Hdds] = {
+      implicit client: OneandoneClient): Server = {
 
     val response = client.post(path :+ id :+ hddsPath, Extraction.decompose(request).snakizeKeys)
     val json     = parse(response).camelizeKeys
-    json.extract[Seq[Hdds]]
+    json.extract[Server]
   }
 
   def getServersSingleHdd(id: String, hddId: String)(implicit client: OneandoneClient): Hdds = {
@@ -130,26 +130,26 @@ object Server extends oneandone.Path {
     json.extract[Hdds]
   }
 
-  def updateServerSingleHdd(id: String, hddId: String, newSize: String)(
+  def updateServerSingleHdd(id: String, hddId: String, newSize: Int)(
       implicit client: OneandoneClient): Server = {
     val request =
       ("size" -> newSize)
     val response =
-      client.post(path :+ id :+ hddsPath :+ hddId, Extraction.decompose(request).snakizeKeys)
+      client.put(path :+ id :+ hddsPath :+ hddId, Extraction.decompose(request).snakizeKeys)
     val json = parse(response).camelizeKeys
     json.extract[Server]
   }
 
-  def getServerImage(id: String)(implicit client: OneandoneClient): Hdds = {
+  def getServerImage(id: String)(implicit client: OneandoneClient): Image = {
     val response = client.get(path :+ id :+ serverImagePath)
     val json     = parse(response).camelizeKeys
-    json.extract[Hdds]
+    json.extract[Image]
   }
 
   def reinstallServersImage(id: String, request: ReinstallImageRequest)(
       implicit client: OneandoneClient): Server = {
     val response =
-      client.post(path :+ id :+ serverImagePath, Extraction.decompose(request).snakizeKeys)
+      client.put(path :+ id :+ serverImagePath, Extraction.decompose(request).snakizeKeys)
     val json = parse(response).camelizeKeys
     json.extract[Server]
   }
@@ -279,10 +279,10 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def listSnapshots(id: String)(implicit client: OneandoneClient): Seq[Snapshots] = {
+  def getSnapshots(id: String)(implicit client: OneandoneClient): Snapshots = {
     val response = client.get(path :+ id :+ snapshotsPath)
     val json     = parse(response).camelizeKeys
-    json.extract[Seq[Snapshots]]
+    json.extract[Snapshots]
   }
 
   def createSnapshot(id: String)(implicit client: OneandoneClient): Server = {
@@ -299,9 +299,10 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def cloneServer(id: String)(implicit client: OneandoneClient): Server = {
+  def cloneServer(id: String, request: CloneServerRequest)(
+      implicit client: OneandoneClient): Server = {
     val response =
-      client.post(path :+ id :+ "clone", Extraction.decompose(null))
+      client.post(path :+ id :+ "clone", Extraction.decompose(request))
     val json = parse(response).camelizeKeys
     json.extract[Server]
   }
