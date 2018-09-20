@@ -15,7 +15,7 @@ class ServerTest extends FunSuite {
   test("Create fixed instance server") {
 
     var request = ServerRequest(
-      "fixed sizescala testBB",
+      "fixed sizescala testDD",
       Some("desc"),
       Hardware(
         None,
@@ -32,7 +32,7 @@ class ServerTest extends FunSuite {
   test("Create custom hardware server") {
 
     var request = ServerRequest(
-      "custom scala testBB",
+      "custom scala testDD",
       Some("desc"),
       Hardware(
         None,
@@ -53,7 +53,7 @@ class ServerTest extends FunSuite {
   }
 
   test("Modify server information") {
-    val updatedName    = "custom server updated name"
+    val updatedName    = "custom server updated nameDD"
     var modifiedServer = Server.modifyServerInformation(customServer.id, updatedName, updatedName)
     Server.waitServerStatus(customServer.id, "POWERED_ON")
     assert(modifiedServer.name == updatedName)
@@ -145,7 +145,7 @@ class ServerTest extends FunSuite {
     var serverHdd = Server.addHddToServer(customServer.id, newHdds)
     Server.waitServerStatus(customServer.id, "POWERED_ON")
     serverHdd = Server.get(customServer.id)
-    assert(serverHdd.hardware.hdds.size == 2)
+    assert(serverHdd.hardware.hdds.get.size == 2)
   }
 
   test("Resize server hdds") {
@@ -153,7 +153,7 @@ class ServerTest extends FunSuite {
     var hddId     = serverHdds(1).id
     var serverHdd = Server.updateServerSingleHdd(customServer.id, hddId.get, 120)
     Server.waitServerStatus(customServer.id, "POWERED_ON")
-    assert(serverHdd.hardware.hdds.size == 2)
+    assert(serverHdd.hardware.hdds.get.size == 2)
   }
   test("Delete server hdds") {
     serverHdds = Server.getServerHdds(customServer.id)

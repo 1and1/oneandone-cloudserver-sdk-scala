@@ -351,8 +351,8 @@ object Server extends oneandone.Path {
     var response = client.get(path :+ id)
     var json     = parse(response).camelizeKeys
     var srvr     = json.extract[Server]
-    while (srvr.status.state != status || (srvr.status.percent != null && srvr.status.percent != 99)) {
-      Thread.sleep(5000)
+    while (srvr.status.state != status) {
+      Thread.sleep(8000)
       response = client.get(path :+ id)
       json = parse(response).camelizeKeys
       srvr = json.extract[Server]
