@@ -1,7 +1,6 @@
 package oneandone.servers
 
-case class Hdds(
-    id: Option[String] = None,
+case class HddRequest(
     size: Double,
     isMain: Boolean
-)
+) {}
