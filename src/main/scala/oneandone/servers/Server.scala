@@ -385,6 +385,7 @@ object Server extends oneandone.Path {
     val path = this.path :+ id
     try {
       while (true) {
+        Thread.sleep(10000)
         client.get(path)
       }
     } catch {

@@ -16,7 +16,7 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
   override def beforeAll(): Unit = {
     super.beforeAll()
     var serverRequest = ServerRequest(
-      "Scala firewall policy tes1t",
+      "Scala firewall policy test",
       Some("desc"),
       Hardware(
         None,
