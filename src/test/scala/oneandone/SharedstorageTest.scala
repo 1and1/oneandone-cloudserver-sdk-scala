@@ -1,10 +1,9 @@
 package oneandone
 import oneandone.servers.{Hardware, Server, ServerRequest}
 import oneandone.sharedstorages._
-import org.scalatest.FunSuite
-import org.scalatest.BeforeAndAfter
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, BeforeAndAfterEach, FunSuite}
 
-class SharedstorageTest extends FunSuite with BeforeAndAfter {
+class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
   implicit val client = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
   var Sharedstorages: Seq[Sharedstorage] = Seq.empty
   var fixedServer: Server = null
@@ -12,7 +11,8 @@ class SharedstorageTest extends FunSuite with BeforeAndAfter {
   var testss: Sharedstorage = null
   var datacenters = oneandone.datacenters.Datacenter.list()
 
-  before {
+  override def beforeAll(): Unit = {
+    super.beforeAll()
     var serverRequest = ServerRequest(
       "Scala shared storage test2",
       Some("desc"),
@@ -26,8 +26,6 @@ class SharedstorageTest extends FunSuite with BeforeAndAfter {
     fixedServer = Server.createCloud(serverRequest)
     Server.waitServerStatus(fixedServer.id, "POWERED_ON")
   }
-
-
 
   test("Create Sharedstorage") {
 
@@ -104,7 +102,8 @@ class SharedstorageTest extends FunSuite with BeforeAndAfter {
     assert(ssA != null)
   }
 
-  after {
+  override def afterAll(): Unit = {
+    super.afterAll()
     if (testss != null) {
       Sharedstorage.waitSharedstorageStatus(testss.id, "ACTIVE")
       Sharedstorage.delete(testss.id)
