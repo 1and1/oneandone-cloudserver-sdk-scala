@@ -7,7 +7,7 @@ case class Datacenter(
     id: String,
     location: String,
     countryCode: String,
-    default: Boolean
+    default: Option[Boolean]
 ) {}
 
 object Datacenter extends Path {

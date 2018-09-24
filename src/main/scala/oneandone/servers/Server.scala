@@ -79,6 +79,7 @@ object Server extends oneandone.Path {
     json.extract[BaremetalModel]
   }
 
+  //todo: add server baremetal tests
   def createCloud(request: ServerRequest)(implicit client: OneandoneClient): Server = {
 
     val response = client.post(path, Extraction.decompose(request).snakizeKeys)
