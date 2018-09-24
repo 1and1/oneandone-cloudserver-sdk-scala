@@ -11,7 +11,7 @@ case class Ping(
 
 object Ping extends Path {
   val serializers                              = List(BooleanCustomSerializer)
-  implicit lazy val serializerFormats: Formats = DefaultFormats ++ serializers
+  override implicit lazy val serializerFormats: Formats = DefaultFormats ++ serializers
   override val path: Seq[String]               = Seq("ping")
 
   def get()(implicit client: OneandoneClient): Ping = {

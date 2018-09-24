@@ -15,7 +15,7 @@ case class RecoveryAppliance(
 
 object RecoveryAppliance extends Path {
   val serializers                              = List(BooleanCustomSerializer)
-  implicit lazy val serializerFormats: Formats = DefaultFormats ++ serializers
+  override implicit lazy val serializerFormats: Formats = DefaultFormats ++ serializers
   override val path: Seq[String]               = Seq("recovery_appliances")
 
   def list()(implicit client: OneandoneClient): Seq[RecoveryAppliance] = {

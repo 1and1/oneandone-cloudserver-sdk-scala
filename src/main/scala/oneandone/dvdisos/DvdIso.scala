@@ -22,7 +22,6 @@ case class DvdIso(
 
 object DvdIso extends Path {
   val serializers                              = List(BooleanCustomSerializer)
-  implicit lazy val serializerFormats: Formats = DefaultFormats ++ serializers
   override val path: Seq[String]               = Seq("dvd_isos")
 
   def list()(implicit client: OneandoneClient): Seq[DvdIso] = {

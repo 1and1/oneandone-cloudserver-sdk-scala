@@ -23,7 +23,6 @@ object Sharedstorage extends oneandone.Path {
   override val path: Seq[String] = Seq("shared_storages")
   var ssServersPath = "servers"
   var ssAccessPath = "access"
-  implicit lazy val serializerFormats: Formats = DefaultFormats
 
   def list(
       queryParameters: Map[String, String] = Map.empty

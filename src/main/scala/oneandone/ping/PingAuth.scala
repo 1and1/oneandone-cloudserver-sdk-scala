@@ -10,7 +10,7 @@ case class PingAuth(
 
 object PingAuth extends Path {
   val serializers                              = List(BooleanCustomSerializer)
-  implicit lazy val serializerFormats: Formats = DefaultFormats ++ serializers
+  override implicit lazy val serializerFormats: Formats = DefaultFormats ++ serializers
   override val path: Seq[String]               = Seq("ping_auth")
 
   def get()(implicit client: OneandoneClient): PingAuth = {

@@ -29,7 +29,6 @@ case class Image(
 
 object Image extends oneandone.Path {
   override val path: Seq[String] = Seq("images")
-  implicit lazy val serializerFormats: Formats = DefaultFormats
 
   def list(
       queryParameters: Map[String, String] = Map.empty
