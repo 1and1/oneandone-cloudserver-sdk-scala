@@ -19,7 +19,6 @@ case class Blockstorage(
 object Blockstorage extends oneandone.Path {
   override val path: Seq[String] = Seq("block_storages")
   var bsServersPath = "server"
-  implicit lazy val serializerFormats: Formats = DefaultFormats
 
   def list(
       queryParameters: Map[String, String] = Map.empty

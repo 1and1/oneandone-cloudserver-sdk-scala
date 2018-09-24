@@ -11,15 +11,15 @@ import scala.concurrent.duration._
 import org.json4s.CustomSerializer
 
 /**
- *
- * @param token Your API token.
- */
+  *
+  * @param token Your API token.
+  */
 case class OneandoneClient(
     private val token: String
 ) {
 
-  implicit val backend    = HttpURLConnectionBackend()
-  val contentType         = "application/json; charset=utf-8"
+  implicit val backend = HttpURLConnectionBackend()
+  val contentType = "application/json; charset=utf-8"
   var applicationJsonType = "application/json"
 
   def get[T: Manifest](
@@ -41,6 +41,8 @@ case class OneandoneClient(
     if (response.isSuccess) {
       response.body.right.get
     } else {
+      if (response.code == 404)
+        throw new NotFoundExcepetion(response.body.left.get)
       //error handling
       throw new Exception(response.body.left.get)
     }

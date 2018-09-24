@@ -13,7 +13,7 @@ case class Price(
 
 object Price extends Path {
   val serializers                              = List(BooleanCustomSerializer)
-  implicit lazy val serializerFormats: Formats = DefaultFormats ++ serializers
+  override implicit lazy val serializerFormats: Formats = DefaultFormats ++ serializers
   override val path: Seq[String]               = Seq("pricing")
 
   def get()(implicit client: OneandoneClient): Price = {
