@@ -383,14 +383,13 @@ object Server extends oneandone.Path {
       id: String
   )(implicit client: OneandoneClient): Boolean = {
     val path = this.path :+ id
-    while (true) {
-      try {
+    try {
+      while (true) {
         client.get(path)
-      } catch {
-        case e: Exception =>
-          println("exception caught: " + e)
-          false
       }
+    } catch {
+      case e: oneandone.NotFoundExcepetion =>
+        false
     }
     true
   }
