@@ -1,7 +1,6 @@
 package oneandone
 import oneandone.firewallpolicies._
 import oneandone.servers.{Hardware, Server, ServerRequest}
-import oneandone.sharedstorages.Sharedstorage
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {

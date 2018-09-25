@@ -55,6 +55,7 @@ case class OneandoneClient(
     var fullPath = OneandoneClient.host
     for (part <- path) fullPath += ("/" + part)
     val messageBody = JsonMethods.compact(JsonMethods.render(message.snakizeKeys))
+    println(messageBody)
     val request = sttp
       .header("X-Token", token)
       .header("Content-Type", applicationJsonType)
