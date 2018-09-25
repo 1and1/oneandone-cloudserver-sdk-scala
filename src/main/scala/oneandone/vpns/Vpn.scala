@@ -1,12 +1,11 @@
 package oneandone.vpns
-import java.io._
-import java.net.MalformedURLException
 import java.util.Base64
 
 import oneandone.OneandoneClient
 import oneandone.datacenters.Datacenter
 import org.json4s.Extraction
 import org.json4s.native.JsonMethods.parse
+import java.io.FileOutputStream
 
 case class Vpn(
     id: String,
@@ -38,11 +37,11 @@ object Vpn extends oneandone.Path {
 
   def downloadVpnConfigurationZIP(id: String, filePath: String)(
       implicit client: OneandoneClient
-  ): ConfigResponse = {
+  ): Unit = {
     val response = client.get(path :+ id :+ "configuration_file")
     val json = parse(response).camelizeKeys
     var objectResponse = json.extract[ConfigResponse]
-    downloadVpnConfigurationZIP(objectResponse.configZipFile, filePath)
+    downloadConfigFile(objectResponse.configZipFile, filePath)
   }
 
   def downloadVpnConfigurationString(id: String, filePath: String)(
@@ -53,25 +52,13 @@ object Vpn extends oneandone.Path {
     json.extract[ConfigResponse]
   }
 
-  @throws[FileNotFoundException]
-  @throws[MalformedURLException]
-  @throws[IOException]
-  private def DownloadConfigurationFile(codedFile: String, fileName: String): Unit = {
-    val _fileName = fileName //The file that will be saved on your computer
-    //Code to download
-    val in = new ByteArrayInputStream(codedFile.getBytes("UTF-8"))
-    val out = new ByteArrayOutputStream
-    val buf = new Array[Byte](1024)
-    var n = 0
-    while ({ -1 != (n = in.read(buf)) }) out.write(buf, 0, n)
-    out.close()
-    in.close()
-    val response = Base64.getDecoder.decode(out.toByteArray)
-    val fos = new FileOutputStream(_fileName)
-    fos.write(response)
-    fos.close()
-    //End download code
-    System.out.println("Finished")
+  private def downloadConfigFile(codedFile: String, fileName: String): Unit = {
+    val data = Base64.getDecoder.decode(codedFile)
+    try {
+      val stream = new FileOutputStream(fileName)
+      try stream.write(data)
+      finally if (stream != null) stream.close()
+    }
   }
 
   def createVpn(request: VpnRequest)(implicit client: OneandoneClient): Vpn = {

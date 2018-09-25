@@ -1,5 +1,4 @@
 package oneandone
-import oneandone.servers.{Hardware, Server, ServerRequest}
 import oneandone.vpns.{UpdateVpnRequest, Vpn, VpnRequest}
 import org.scalatest.FunSuite
 
@@ -30,7 +29,7 @@ class VpnTest extends FunSuite {
   }
 
   test("Download Vpn configuration ZIP") {
-    Vpn.downloadVpnConfigurationZIP(testVpn.id, "\"C:\\\\temp\"")
+    Vpn.downloadVpnConfigurationZIP(testVpn.id, "C:/temp")
   }
 
   test("Update Vpn") {
