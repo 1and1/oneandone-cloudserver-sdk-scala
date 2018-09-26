@@ -23,8 +23,13 @@ class UsagesTest extends FunSuite {
     c.add(Calendar.DATE, 1)
     var tommorow = c.getTime()
     usages = Usages.list(CUSTOM, twentydaysago, tommorow)
-    println(usages)
 
+    assert(usages != null)
+  }
+
+  test("List Usages Response fixed period") {
+
+    usages = Usages.list(LAST_7D)
     assert(usages != null)
   }
 }

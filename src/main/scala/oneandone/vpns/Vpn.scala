@@ -54,11 +54,9 @@ object Vpn extends oneandone.Path {
 
   private def downloadConfigFile(codedFile: String, fileName: String): Unit = {
     val data = Base64.getDecoder.decode(codedFile)
-    try {
       val stream = new FileOutputStream(fileName)
-      try stream.write(data)
+      try {stream.write(data)}
       finally if (stream != null) stream.close()
-    }
   }
 
   def createVpn(request: VpnRequest)(implicit client: OneandoneClient): Vpn = {
