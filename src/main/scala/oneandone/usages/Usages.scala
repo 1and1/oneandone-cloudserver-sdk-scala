@@ -14,8 +14,6 @@ case class Usages(
 ) {}
 
 object Usages extends Path {
-  val serializers                              = List(BooleanCustomSerializer)
-  implicit lazy val serializerFormats: Formats = DefaultFormats ++ serializers
   override val path: Seq[String]               = Seq("usages")
 
   def list(period: UsageRequestPeriod.Value)(implicit client: OneandoneClient): Usages = {
