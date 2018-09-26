@@ -9,5 +9,9 @@ case class ResourceStatus(
 ) {}
 
 case class Unit(
-    usedPsercent: String
+    usedPsercent: Option[String],
+    downstream: Option[String],
+    upstream: Option[String],
+    pl: Option[String],
+    rta: Option[String]
 )

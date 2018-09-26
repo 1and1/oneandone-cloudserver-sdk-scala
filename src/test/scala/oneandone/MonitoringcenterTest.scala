@@ -31,7 +31,7 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
   override def afterAll(): Unit = {
     super.afterAll()
     if (fixedServer != null) {
-      Server.delete(fixedServer.id)
+//      Server.delete(fixedServer.id)
     }
   }
   var mcs: Seq[Monitoringcenter] = Seq.empty
@@ -42,16 +42,17 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
   }
 
   test("Get monitoring policy for server") {
-    val format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-    var today = format.format(Calendar.getInstance().getTime())
-
-    //todo: add monitoring policy on server and fix the overall enums
+    var today = Calendar.getInstance().getTime()
     //add one day from today
+
     var dt = new Date()
     val c = Calendar.getInstance
     c.setTime(dt)
     c.add(Calendar.DATE, 1)
-    var tommorow = format.format(c.getTime())
+    var tommorow = c.getTime()
+
+    //todo: add monitoring policy on server and fix the overall enums
+
     var mc = Monitoringcenter.get(
       fixedServer.id,
       Period.CUSTOM,
