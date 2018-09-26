@@ -66,7 +66,7 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
 
     var mc = Monitoringcenter.get(
       fixedServer.id,
-      Period.LAST_7D
+      Period.LAST_HOUR
     )
     println(mc)
     assert(mc.id == fixedServer.id)
