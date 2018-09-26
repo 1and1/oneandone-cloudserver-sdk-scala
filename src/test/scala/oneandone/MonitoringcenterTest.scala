@@ -31,14 +31,14 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
   override def afterAll(): Unit = {
     super.afterAll()
     if (fixedServer != null) {
-//      Server.delete(fixedServer.id)
+      Server.delete(fixedServer.id)
     }
   }
   var mcs: Seq[Monitoringcenter] = Seq.empty
 
   test("List monitoring policies") {
     mcs = Monitoringcenter.list()
-    assert(datacenters.size == 4)
+    assert(mcs != null)
   }
 
   test("Get monitoring policy for server") {
@@ -59,6 +59,16 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
       today,
       tommorow
     )
+    assert(mc.id == fixedServer.id)
+  }
+
+  test("Get monitoring policy for server with fixed period") {
+
+    var mc = Monitoringcenter.get(
+      fixedServer.id,
+      Period.LAST_HOUR
+    )
+    println(mc)
     assert(mc.id == fixedServer.id)
   }
 

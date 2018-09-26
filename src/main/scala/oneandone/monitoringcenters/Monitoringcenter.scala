@@ -33,7 +33,7 @@ object Monitoringcenter extends Path {
     json.extract[Seq[Monitoringcenter]]
   }
 
-  def get(id: String, period: Period, startDate: Date, endDate: Date)(
+  def get(id: String, period: Period, startDate: Date = null, endDate: Date = null)(
       implicit client: OneandoneClient
   ): ServerUsage = {
 
