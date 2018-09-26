@@ -1,7 +1,7 @@
 package oneandone.usages
 
 case class UsageService(
-  name: String,
+  name: Option[String],
   `type`: String,
   avgAmount: Integer,
   unit: String,

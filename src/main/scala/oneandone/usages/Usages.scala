@@ -14,25 +14,22 @@ case class Usages(
 ) {}
 
 object Usages extends Path {
-  override val path: Seq[String]               = Seq("usages")
+  override val path: Seq[String] = Seq("usages")
 
   def list(period: UsageRequestPeriod.Value)(implicit client: OneandoneClient): Usages = {
     val updatedPath: Seq[String] = Seq(path(0) + "?period=" + period.toString())
     val response = client.get(updatedPath)
-
-    val json     = parse(snakizeRootKeys(response)).camelizeKeys
-
-    println("USAGES json: ")
-    println(json)
+    val json = parse(snakizeRootKeys(response)).camelizeKeys
 
     json.extract[Usages]
   }
 
-  def snakizeRootKeys(s: String) = s.replaceAll("SERVERS", "servers")
-    .replaceAll("CONTAINER CLUSTER", "container_cluster")
-    .replaceAll("BLOCK STORAGE", "block_storage")
-    .replaceAll("IMAGES", "images")
-    .replaceAll("STORAGE", "storage")
-    .replaceAll("NETWORK", "network")
-    .replaceAll("PUBLIC_IPS", "public_ips")
+  def snakizeRootKeys(s: String) =
+    s.replaceAll("SERVERS", "servers")
+      .replaceAll("CONTAINER CLUSTER", "container_cluster")
+      .replaceAll("BLOCK STORAGE", "block_storage")
+      .replaceAll("IMAGES", "images")
+      .replaceAll("STORAGE", "storage")
+      .replaceAll("NETWORK", "network")
+      .replaceAll("PUBLIC_IPS", "public_ips")
 }
