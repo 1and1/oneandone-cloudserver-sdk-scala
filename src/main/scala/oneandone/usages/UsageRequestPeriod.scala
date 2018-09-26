@@ -9,4 +9,5 @@ object UsageRequestPeriod extends Enumeration {
   val LAST_7D = Value("LAST_7D")
   val LAST_30D = Value("LAST_30D")
   val LAST_365D = Value("LAST_365D")
+  val CUSTOM = Value("CUSTOM")
 }

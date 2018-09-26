@@ -1,6 +1,8 @@
 package oneandone.usages
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import oneandone.{BooleanCustomSerializer, OneandoneClient, Path}
-import org.json4s.{DefaultFormats, Formats}
 import org.json4s.native.JsonMethods._
 
 case class Usages(
@@ -16,9 +18,18 @@ case class Usages(
 object Usages extends Path {
   override val path: Seq[String] = Seq("usages")
 
-  def list(period: UsageRequestPeriod.Value)(implicit client: OneandoneClient): Usages = {
-    val updatedPath: Seq[String] = Seq(path(0) + "?period=" + period.toString())
-    val response = client.get(updatedPath)
+  def list(period: UsageRequestPeriod.Value, startDate: Date = null, endDate: Date = null)(
+      implicit client: OneandoneClient
+  ): Usages = {
+    var fullPath: String = "?period=" + period.toString
+    if (period == UsageRequestPeriod.CUSTOM) {
+      val format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+      var sDate = format.format((startDate))
+      var eDate = format.format(endDate)
+      fullPath += "&start_date=" + sDate + "&end_date=" + eDate
+    }
+    var customPath = Seq("usages" + fullPath)
+    val response = client.get(customPath)
     val json = parse(snakizeRootKeys(response)).camelizeKeys
 
     json.extract[Usages]
