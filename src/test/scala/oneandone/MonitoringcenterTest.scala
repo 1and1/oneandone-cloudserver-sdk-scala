@@ -3,7 +3,7 @@ import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
 
 import oneandone.monitoringcenters.{Monitoringcenter, Period}
-import oneandone.servers.{Hardware, Server, ServerRequest}
+import oneandone.servers.{Hardware, Server, ServerRequest, ServerState}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
@@ -25,7 +25,7 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
       Some(datacenters(0).id)
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
   }
 
   override def afterAll(): Unit = {

@@ -4,18 +4,18 @@ import oneandone.privatenetworks.{
   Privatenetwork,
   UpdatePrivateNetworkRequest
 }
-import oneandone.servers.{Datacenter, Hardware, Server, ServerRequest}
+import oneandone.servers._
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class PrivatenetworkTest extends FunSuite with BeforeAndAfterAll {
-  implicit val client = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
+  implicit val client                      = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
   var privatenetworks: Seq[Privatenetwork] = Seq.empty
-  var fixedServer: Server = null
+  var fixedServer: Server                  = null
 
-  var serverIds: List[String] = List[String]()
+  var serverIds: List[String]     = List[String]()
   val smallServerInstance: String = "81504C620D98BCEBAA5202D145203B4B"
-  var testPn: Privatenetwork = null
-  var datacenters = oneandone.datacenters.Datacenter.list()
+  var testPn: Privatenetwork      = null
+  var datacenters                 = oneandone.datacenters.Datacenter.list()
   override def beforeAll(): Unit = {
     super.beforeAll()
     for (a <- 1 to 3) {
@@ -30,7 +30,7 @@ class PrivatenetworkTest extends FunSuite with BeforeAndAfterAll {
         Some(datacenters(0).id)
       )
       fixedServer = Server.createCloud(serverRequest)
-      Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+      Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
       serverIds = serverIds :+ fixedServer.id
     }
 
@@ -40,6 +40,7 @@ class PrivatenetworkTest extends FunSuite with BeforeAndAfterAll {
     super.afterAll()
     var serverId = ""
     for (id <- serverIds) {
+      Server.waitServerStatus(id, ServerState.POWERED_ON)
       Server.delete(id)
       serverId = id
     }
@@ -79,7 +80,7 @@ class PrivatenetworkTest extends FunSuite with BeforeAndAfterAll {
     bs = Privatenetwork.get(testPn.id)
     assert(bs.servers.get(0).id == fixedServer.id)
 
-    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
   }
 
   test("list attached servers") {
@@ -105,6 +106,29 @@ class PrivatenetworkTest extends FunSuite with BeforeAndAfterAll {
     var bs = Privatenetwork.updatePrivatenetwork(testPn.id, updateRequest)
     assert(bs.name == "updated name")
     Privatenetwork.waitPrivatenetworkStatus(testPn.id, "ACTIVE")
+  }
+
+  test("attach server from server class") {
+
+    var attachedServer = Server.assignPrivateNetwork(fixedServer.id, testPn.id)
+    Privatenetwork.waitPrivatenetworkStatus(testPn.id, "ACTIVE")
+    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
+    assert(attachedServer.privateNetworks.get.size > 0)
+  }
+
+  test("server list attached private netowrks") {
+    var pns = Server.listPrivateNetwork(fixedServer.id)
+    assert(pns.size > 0)
+  }
+
+  test(" server Get attached private netowrks") {
+    var pn = Server.getPrivateNetwork(fixedServer.id, testPn.id)
+    assert(pn.id == testPn.id)
+  }
+
+  test("Server detach private network") {
+    var pns = Server.deletePrivateNetwork(fixedServer.id, testPn.id)
+    assert(pns.privateNetworks == None)
   }
 
 }

@@ -1,5 +1,5 @@
 package oneandone
-import oneandone.servers.{Hardware, Server, ServerRequest}
+import oneandone.servers.{Hardware, Server, ServerRequest, ServerState}
 import oneandone.sharedstorages._
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, BeforeAndAfterEach, FunSuite}
 
@@ -24,7 +24,7 @@ class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
       Some(datacenters(0).id)
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
   }
 
   test("Create Sharedstorage") {

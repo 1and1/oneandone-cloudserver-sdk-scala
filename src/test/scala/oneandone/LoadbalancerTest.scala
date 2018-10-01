@@ -1,6 +1,6 @@
 package oneandone
 import oneandone.loadbalancers._
-import oneandone.servers.{Hardware, Server, ServerRequest}
+import oneandone.servers._
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
@@ -25,7 +25,7 @@ class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
       Some(datacenters(0).id)
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
   }
 
   override def afterAll(): Unit = {
@@ -35,7 +35,7 @@ class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
       Server.waitServerDeleted(fixedServer.id)
     }
     if (testLB != null) {
-      Loadbalancer.waitLoadbalancerStatus(testLB.id, "ACTIVE")
+      Loadbalancer.waitLoadbalancerStatus(testLB.id, GeneralState.ACTIVE)
       Loadbalancer.delete(testLB.id)
     }
   }
@@ -56,7 +56,7 @@ class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
     )
 
     testLB = Loadbalancer.createLoadbalancer(request)
-    Loadbalancer.waitLoadbalancerStatus(testLB.id, "ACTIVE")
+    Loadbalancer.waitLoadbalancerStatus(testLB.id, GeneralState.ACTIVE)
 
   }
 
@@ -78,7 +78,7 @@ class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
     )
     var bs = Loadbalancer.updateLoadbalancer(testLB.id, updateRequest)
     assert(bs.name == "new name scala test")
-    Loadbalancer.waitLoadbalancerStatus(testLB.id, "ACTIVE")
+    Loadbalancer.waitLoadbalancerStatus(testLB.id, GeneralState.ACTIVE)
   }
 
   test("assign LoadBalancer  to server ip ") {
@@ -86,7 +86,7 @@ class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
     fixedServer = Server.get(fixedServer.id)
     var request = Seq(fixedServer.ips.get(0).id)
     var result = Loadbalancer.assignToServerIps(testLB.id, request)
-    Loadbalancer.waitLoadbalancerStatus(testLB.id, "ACTIVE")
+    Loadbalancer.waitLoadbalancerStatus(testLB.id, GeneralState.ACTIVE)
     assert(result.serverIps.get.size > 0)
   }
 
@@ -114,7 +114,7 @@ class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
     var result = Loadbalancer.assignRules(testLB.id, request)
     println(result.rules.get)
     testRule = result.rules.get(1)
-    Loadbalancer.waitLoadbalancerStatus(testLB.id, "ACTIVE")
+    Loadbalancer.waitLoadbalancerStatus(testLB.id, GeneralState.ACTIVE)
     assert(result.rules.get.size > 1)
   }
 

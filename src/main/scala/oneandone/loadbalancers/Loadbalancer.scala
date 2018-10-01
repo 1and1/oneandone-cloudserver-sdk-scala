@@ -2,13 +2,14 @@ package oneandone.loadbalancers
 import oneandone.OneandoneClient
 import oneandone.datacenters.Datacenter
 import oneandone.firewallpolicies._
+import oneandone.servers.GeneralState.GeneralState
 import org.json4s.Extraction
 import org.json4s.native.JsonMethods.parse
 
 case class Loadbalancer(
     id: String,
     name: String,
-    state: String,
+    state: GeneralState,
     creationDate: String,
     description: String,
     ip: String,
@@ -26,20 +27,20 @@ case class Loadbalancer(
 
 object Loadbalancer extends oneandone.Path {
   override val path: Seq[String] = Seq("load_balancers")
-  var serversPath = "server_ips"
-  var rulesPath = "rules"
+  var serversPath                = "server_ips"
+  var rulesPath                  = "rules"
 
   def list(
       queryParameters: Map[String, String] = Map.empty
   )(implicit client: OneandoneClient): Seq[Loadbalancer] = {
     val response = client.get(path, queryParameters)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Seq[Loadbalancer]]
   }
 
   def get(id: String)(implicit client: OneandoneClient): Loadbalancer = {
     val response = client.get(path :+ id)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Loadbalancer]
   }
 
@@ -48,7 +49,7 @@ object Loadbalancer extends oneandone.Path {
   )(implicit client: OneandoneClient): Loadbalancer = {
 
     val response = client.post(path, Extraction.decompose(request).snakizeKeys)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Loadbalancer]
   }
 
@@ -57,13 +58,13 @@ object Loadbalancer extends oneandone.Path {
   ): Loadbalancer = {
 
     val response = client.put(path :+ id, Extraction.decompose(request).snakizeKeys)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Loadbalancer]
   }
 
   def delete(id: String)(implicit client: OneandoneClient): Loadbalancer = {
     val response = client.delete(path :+ id)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Loadbalancer]
   }
 
@@ -71,7 +72,7 @@ object Loadbalancer extends oneandone.Path {
       loadbalancerId: String
   )(implicit client: OneandoneClient): Seq[ServerIps] = {
     val response = client.get(path :+ loadbalancerId :+ serversPath)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Seq[ServerIps]]
   }
 
@@ -94,7 +95,7 @@ object Loadbalancer extends oneandone.Path {
       serverIpId: String
   )(implicit client: OneandoneClient): Loadbalancer = {
     val response = client.delete(path :+ loadbalancerId :+ serversPath :+ serverIpId)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Loadbalancer]
   }
 
@@ -103,7 +104,7 @@ object Loadbalancer extends oneandone.Path {
       serverIpId: String
   )(implicit client: OneandoneClient): ServerIps = {
     val response = client.get(path :+ loadbalancerId :+ serversPath :+ serverIpId)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[ServerIps]
   }
 
@@ -111,7 +112,7 @@ object Loadbalancer extends oneandone.Path {
       loadbalancerId: String
   )(implicit client: OneandoneClient): Seq[Rule] = {
     val response = client.get(path :+ loadbalancerId :+ rulesPath)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Seq[Rule]]
   }
 
@@ -134,7 +135,7 @@ object Loadbalancer extends oneandone.Path {
       ruleId: String
   )(implicit client: OneandoneClient): Rule = {
     val response = client.get(path :+ loadbalancerId :+ rulesPath :+ ruleId)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Rule]
   }
 
@@ -143,16 +144,16 @@ object Loadbalancer extends oneandone.Path {
       ruleId: String
   )(implicit client: OneandoneClient): Loadbalancer = {
     val response = client.delete(path :+ loadbalancerId :+ rulesPath :+ ruleId)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Loadbalancer]
   }
 
-  def waitLoadbalancerStatus(id: String, status: String)(
+  def waitLoadbalancerStatus(id: String, status: GeneralState)(
       implicit client: OneandoneClient
   ): Boolean = {
     var response = client.get(path :+ id)
-    var json = parse(response).camelizeKeys
-    var result = json.extract[Loadbalancer]
+    var json     = parse(response).camelizeKeys
+    var result   = json.extract[Loadbalancer]
     while (result.state != status) {
       Thread.sleep(8000)
       response = client.get(path :+ id)

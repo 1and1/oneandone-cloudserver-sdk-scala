@@ -1,7 +1,7 @@
 package oneandone
 
 import oneandone.monitoringpolicies._
-import oneandone.servers.{Hardware, Server, ServerRequest}
+import oneandone.servers.{Hardware, Server, ServerRequest, ServerState}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
@@ -31,7 +31,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
       Some(datacenters(0).id)
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
   }
 
   override def afterAll(): Unit = {

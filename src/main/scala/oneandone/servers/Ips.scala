@@ -6,6 +6,6 @@ case class Ips(
     `type`: String,
     reverseDns: String,
     firewallPolicy: Option[FirewallPolicy] = None,
-    loadBalancers: Option[LoadBalancer] = None,
+    loadBalancers: Option[Seq[LoadBalancer]] = None,
     main: Boolean
 ) {}

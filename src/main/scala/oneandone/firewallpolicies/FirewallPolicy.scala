@@ -1,5 +1,7 @@
 package oneandone.firewallpolicies
 import oneandone.OneandoneClient
+import oneandone.servers.GeneralState
+import oneandone.servers.GeneralState.GeneralState
 import org.json4s.Extraction
 import org.json4s.native.JsonMethods.parse
 
@@ -7,7 +9,7 @@ case class FirewallPolicy(
     id: String,
     name: String,
     description: String,
-    state: String,
+    state: GeneralState,
     creationDate: String,
     default: Option[Double] = None,
     rules: Option[List[Rule]] = None,
@@ -16,20 +18,20 @@ case class FirewallPolicy(
 
 object FirewallPolicy extends oneandone.Path {
   override val path: Seq[String] = Seq("firewall_policies")
-  var serversPath = "server_ips"
-  var rulesPath = "rules"
+  var serversPath                = "server_ips"
+  var rulesPath                  = "rules"
 
   def list(
       queryParameters: Map[String, String] = Map.empty
   )(implicit client: OneandoneClient): Seq[FirewallPolicy] = {
     val response = client.get(path, queryParameters)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Seq[FirewallPolicy]]
   }
 
   def get(id: String)(implicit client: OneandoneClient): FirewallPolicy = {
     val response = client.get(path :+ id)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[FirewallPolicy]
   }
 
@@ -38,7 +40,7 @@ object FirewallPolicy extends oneandone.Path {
   )(implicit client: OneandoneClient): FirewallPolicy = {
 
     val response = client.post(path, Extraction.decompose(request).snakizeKeys)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[FirewallPolicy]
   }
 
@@ -47,13 +49,13 @@ object FirewallPolicy extends oneandone.Path {
   ): FirewallPolicy = {
 
     val response = client.put(path :+ id, Extraction.decompose(request).snakizeKeys)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[FirewallPolicy]
   }
 
   def delete(id: String)(implicit client: OneandoneClient): FirewallPolicy = {
     val response = client.delete(path :+ id)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[FirewallPolicy]
   }
 
@@ -61,7 +63,7 @@ object FirewallPolicy extends oneandone.Path {
       firewallPolicyId: String
   )(implicit client: OneandoneClient): Seq[ServerIps] = {
     val response = client.get(path :+ firewallPolicyId :+ serversPath)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Seq[ServerIps]]
   }
 
@@ -84,7 +86,7 @@ object FirewallPolicy extends oneandone.Path {
       serverIpId: String
   )(implicit client: OneandoneClient): ServerIps = {
     val response = client.get(path :+ firewallPolicyId :+ serversPath :+ serverIpId)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[ServerIps]
   }
 
@@ -92,7 +94,7 @@ object FirewallPolicy extends oneandone.Path {
       firewallPolicyId: String
   )(implicit client: OneandoneClient): Seq[Rule] = {
     val response = client.get(path :+ firewallPolicyId :+ rulesPath)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Seq[Rule]]
   }
 
@@ -115,7 +117,7 @@ object FirewallPolicy extends oneandone.Path {
       ruleId: String
   )(implicit client: OneandoneClient): Rule = {
     val response = client.get(path :+ firewallPolicyId :+ rulesPath :+ ruleId)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Rule]
   }
 
@@ -124,16 +126,16 @@ object FirewallPolicy extends oneandone.Path {
       ruleId: String
   )(implicit client: OneandoneClient): FirewallPolicy = {
     val response = client.delete(path :+ firewallPolicyId :+ rulesPath :+ ruleId)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[FirewallPolicy]
   }
 
-  def waitFirewallPolicyStatus(id: String, status: String)(
+  def waitFirewallPolicyStatus(id: String, status: GeneralState)(
       implicit client: OneandoneClient
   ): Boolean = {
     var response = client.get(path :+ id)
-    var json = parse(response).camelizeKeys
-    var result = json.extract[FirewallPolicy]
+    var json     = parse(response).camelizeKeys
+    var result   = json.extract[FirewallPolicy]
     while (result.state != status) {
       Thread.sleep(8000)
       response = client.get(path :+ id)

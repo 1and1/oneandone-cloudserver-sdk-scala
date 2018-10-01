@@ -1,6 +1,6 @@
 package oneandone
 import oneandone.images.{Image, ImageRequest, UpdateImageRequest}
-import oneandone.servers.{Hardware, Server, ServerRequest}
+import oneandone.servers.{Hardware, Server, ServerRequest, ServerState}
 import org.scalatest.FunSuite
 
 class ImageTest extends FunSuite {
@@ -27,7 +27,7 @@ class ImageTest extends FunSuite {
       "753E3C1F859874AA74EB63B3302601F5"
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
     var request = ImageRequest(
       serverId = fixedServer.id,
       name = "scala test image",
