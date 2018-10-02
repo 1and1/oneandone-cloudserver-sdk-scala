@@ -33,7 +33,7 @@ class ServerImageSnapshotTest extends FunSuite with BeforeAndAfterAll {
   override def afterAll(): Unit = {
     super.afterAll()
     if (fixedServer != null) {
-      Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
+      Server.waitServerStatusAndPercentage(fixedServer.id, ServerState.POWERED_ON)
       Server.delete(fixedServer.id)
     }
 
