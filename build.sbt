@@ -14,6 +14,7 @@ libraryDependencies ++= Seq(
   "com.softwaremill.sttp" %% "akka-http-backend" % "1.3.3",
   "com.softwaremill.sttp" %% "json4s" % "1.3.3",
   "org.json4s" %% "json4s-jackson" % "3.6.1",
+  "org.json4s" %% "json4s-ext" % "3.2.11",
   "com.typesafe" % "config" % "1.3.2" % "test",
   "org.scalatest" %% "scalatest" % "3.0.4" % "test",
   "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.9.0" % "test",

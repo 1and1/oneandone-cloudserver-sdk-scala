@@ -1,6 +1,6 @@
 package oneandone.sharedstorages
 
-case class ServerRequest(
+case class SharedStorageServerRequest(
     id: String,
     rights: String
 ) {}

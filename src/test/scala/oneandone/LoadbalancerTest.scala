@@ -1,16 +1,16 @@
 package oneandone
 import oneandone.loadbalancers._
-import oneandone.servers.{Hardware, Server, ServerRequest}
+import oneandone.servers._
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
-  implicit val client = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
+  implicit val client                  = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
   var loadBalancers: Seq[Loadbalancer] = Seq.empty
-  var fixedServer: Server = null
-  val smallServerInstance: String = "81504C620D98BCEBAA5202D145203B4B"
-  var testLB: Loadbalancer = null
-  var testRule: Rule = null
-  var datacenters = oneandone.datacenters.Datacenter.list()
+  var fixedServer: Server              = null
+  val smallServerInstance: String      = "81504C620D98BCEBAA5202D145203B4B"
+  var testLB: Loadbalancer             = null
+  var testRule: Rule                   = null
+  var datacenters                      = oneandone.datacenters.Datacenter.list()
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -25,7 +25,7 @@ class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
       Some(datacenters(0).id)
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
   }
 
   override def afterAll(): Unit = {
@@ -35,7 +35,7 @@ class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
       Server.waitServerDeleted(fixedServer.id)
     }
     if (testLB != null) {
-      Loadbalancer.waitLoadbalancerStatus(testLB.id, "ACTIVE")
+      Loadbalancer.waitLoadbalancerStatus(testLB.id, GeneralState.ACTIVE)
       Loadbalancer.delete(testLB.id)
     }
   }
@@ -44,19 +44,19 @@ class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
 
     var request = LoadbalancerRequest(
       name = "test scala LB",
-      healthCheckTest = "TCP",
+      healthCheckTest = HealthCheckTest.TCP,
       healthCheckInterval = 40,
       persistence = true,
       persistenceTime = 1200,
-      method = "ROUND_ROBIN",
+      method = Method.ROUND_ROBIN,
       rules = Seq[RuleRequest](
-        RuleRequest("TCP", 80, 80)
+        RuleRequest(LoadBalancerProtocol.TCP, 80, 80)
       ),
       datacenterId = Some(datacenters(0).id)
     )
 
     testLB = Loadbalancer.createLoadbalancer(request)
-    Loadbalancer.waitLoadbalancerStatus(testLB.id, "ACTIVE")
+    Loadbalancer.waitLoadbalancerStatus(testLB.id, GeneralState.ACTIVE)
 
   }
 
@@ -78,15 +78,15 @@ class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
     )
     var bs = Loadbalancer.updateLoadbalancer(testLB.id, updateRequest)
     assert(bs.name == "new name scala test")
-    Loadbalancer.waitLoadbalancerStatus(testLB.id, "ACTIVE")
+    Loadbalancer.waitLoadbalancerStatus(testLB.id, GeneralState.ACTIVE)
   }
 
   test("assign LoadBalancer  to server ip ") {
 
     fixedServer = Server.get(fixedServer.id)
     var request = Seq(fixedServer.ips.get(0).id)
-    var result = Loadbalancer.assignToServerIps(testLB.id, request)
-    Loadbalancer.waitLoadbalancerStatus(testLB.id, "ACTIVE")
+    var result  = Loadbalancer.assignToServerIps(testLB.id, request)
+    Loadbalancer.waitLoadbalancerStatus(testLB.id, GeneralState.ACTIVE)
     assert(result.serverIps.get.size > 0)
   }
 
@@ -110,11 +110,11 @@ class LoadbalancerTest extends FunSuite with BeforeAndAfterAll {
 
   test("Add rule") {
 
-    var request = Seq(RuleRequest("TCP", 9000, 9000))
-    var result = Loadbalancer.assignRules(testLB.id, request)
+    var request = Seq(RuleRequest(LoadBalancerProtocol.TCP, 9000, 9000))
+    var result  = Loadbalancer.assignRules(testLB.id, request)
     println(result.rules.get)
     testRule = result.rules.get(1)
-    Loadbalancer.waitLoadbalancerStatus(testLB.id, "ACTIVE")
+    Loadbalancer.waitLoadbalancerStatus(testLB.id, GeneralState.ACTIVE)
     assert(result.rules.get.size > 1)
   }
 

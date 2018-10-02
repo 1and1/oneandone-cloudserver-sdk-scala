@@ -1,4 +1,5 @@
 package oneandone
+import oneandone.servers.GeneralState
 import oneandone.vpns.{UpdateVpnRequest, Vpn, VpnRequest}
 import org.scalatest.FunSuite
 
@@ -19,7 +20,7 @@ class VpnTest extends FunSuite {
     )
 
     testVpn = Vpn.createVpn(request)
-    Vpn.waitVpnStatus(testVpn.id, "ACTIVE")
+    Vpn.waitVpnStatus(testVpn.id, GeneralState.ACTIVE)
 
   }
 
@@ -38,7 +39,7 @@ class VpnTest extends FunSuite {
     )
     var vpn = Vpn.updateVpn(testVpn.id, updateRequest)
     assert(vpn.name == "updated Name")
-    Vpn.waitVpnStatus(testVpn.id, "ACTIVE")
+    Vpn.waitVpnStatus(testVpn.id, GeneralState.ACTIVE)
   }
 
   test("Delete Vpn") {

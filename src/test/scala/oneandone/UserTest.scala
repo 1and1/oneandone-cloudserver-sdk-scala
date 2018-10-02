@@ -1,14 +1,15 @@
 package oneandone
 
-import oneandone.users.{User, Api, CreateUserRequest, UpdateUserApiRequest}
+import oneandone.users.{Api, CreateUserRequest, UpdateUserApiRequest, User}
 import oneandone.roles.{Permission, PermissionDetails}
+import oneandone.servers.GeneralState
 import org.scalatest.FunSuite
 
 class UserTest extends FunSuite {
-  implicit val client = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
-  var users: Seq[User] = Seq.empty
+  implicit val client         = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
+  var users: Seq[User]        = Seq.empty
   var user, createdUser: User = null
-  var permission: Permission = null
+  var permission: Permission  = null
 
   test("List Users") {
     users = User.list()
@@ -31,7 +32,7 @@ class UserTest extends FunSuite {
     )
 
     createdUser = User.createUser(createUserRequest)
-    assert(true == User.waitUserStatus(createdUser.id, "ACTIVE"))
+    assert(true == User.waitUserStatus(createdUser.id, GeneralState.ACTIVE))
   }
 
   test("Get Current User Permissions") {

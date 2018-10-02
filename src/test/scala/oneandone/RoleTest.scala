@@ -1,12 +1,20 @@
 package oneandone
 
-import oneandone.roles.{Role, CreateRoleRequest, UpdateRoleRequest, CloneRoleRequest, Permission, PermissionDetails}
+import oneandone.roles.{
+  CloneRoleRequest,
+  CreateRoleRequest,
+  Permission,
+  PermissionDetails,
+  Role,
+  UpdateRoleRequest
+}
+import oneandone.servers.GeneralState
 import org.scalatest.FunSuite
 
 class RoleTest extends FunSuite {
 
-  implicit val client = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
-  var roles: Seq[Role] = Seq.empty
+  implicit val client                     = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
+  var roles: Seq[Role]                    = Seq.empty
   var role, createdRole, clonedRole: Role = null
 
   test("List Roles") {
@@ -62,7 +70,7 @@ class RoleTest extends FunSuite {
 
   test("Clone a Role") {
     var cloneRoleRequest = CloneRoleRequest("ClonedScalaTestRole")
-    var clonedRole = Role.cloneRole(createdRole.id, cloneRoleRequest)
+    clonedRole = Role.cloneRole(createdRole.id, cloneRoleRequest)
 
     assert(clonedRole != null)
     assert(true == Role.waitRoleStatus(clonedRole.id, "ACTIVE"))
@@ -70,7 +78,9 @@ class RoleTest extends FunSuite {
 
   test("Delete a Role") {
     var deletedRole = Role.delete(createdRole.id)
+    Role.delete(clonedRole.id)
 
     assert(deletedRole.state == "REMOVING")
+
   }
 }

@@ -3,17 +3,81 @@ import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
 
 import oneandone.monitoringcenters.{Monitoringcenter, Period}
-import oneandone.servers.{Hardware, Server, ServerRequest}
+import oneandone.monitoringpolicies._
+import oneandone.servers.{Hardware, Server, ServerRequest, ServerState}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
-  implicit val client = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
-  var fixedServer: Server = null
-  val smallServerInstance: String = "81504C620D98BCEBAA5202D145203B4B"
-  var datacenters = oneandone.datacenters.Datacenter.list()
+  implicit val client                           = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
+  var fixedServer: Server                       = null
+  var createdMonitoringPolicy: MonitoringPolicy = null
+  val smallServerInstance: String               = "81504C620D98BCEBAA5202D145203B4B"
+  var datacenters                               = oneandone.datacenters.Datacenter.list()
   override def beforeAll(): Unit = {
     super.beforeAll()
+    var thresholdDetailWarningA = ThresholdDetail(
+      value = 80,
+      alert = false
+    )
 
+    var thresholdDetailCriticalA = ThresholdDetail(
+      value = 90,
+      alert = false
+    )
+
+    var thresholdDetailWarningB = ThresholdDetail(
+      value = 1000,
+      alert = true
+    )
+
+    var thresholdDetailCriticalB = ThresholdDetail(
+      value = 2000,
+      alert = true
+    )
+
+    var thresholdItemA = ThresholdItem(
+      warning = thresholdDetailWarningA,
+      critical = thresholdDetailCriticalA
+    )
+
+    var thresholdItemB = ThresholdItem(
+      warning = thresholdDetailWarningB,
+      critical = thresholdDetailCriticalB
+    )
+
+    var threshold: Threshold = Threshold(
+      cpu = Option(thresholdItemA),
+      ram = Option(thresholdItemA),
+      internalPing = Option(thresholdItemA),
+      transfer = Option(thresholdItemB),
+      disk = Option(thresholdItemA)
+    )
+
+    var portRequest = PortRequest(
+      protocol = "TCP",
+      port = 22,
+      alertIf = "RESPONDING",
+      emailNotification = false
+    )
+
+    var processRequest = ProcessRequest(
+      process = "Test",
+      alertIf = "NOT_RUNNING",
+      emailNotification = true
+    )
+
+    var createMonitoringPolicyRequest = MonitoringPolicyRequest(
+      name = "aaScalaSdkTestMonitoringPolicy",
+      description =
+        Option("Test - monitoring policy created using oneandone-cloudserver-sdk-scala."),
+      email = "test@test.com",
+      agent = true,
+      thresholds = threshold,
+      ports = Seq(portRequest),
+      processes = Seq(processRequest)
+    )
+
+    createdMonitoringPolicy = MonitoringPolicy.createMonitoringPolicy(createMonitoringPolicyRequest)
     var serverRequest = ServerRequest(
       "Scala monitoring policy 2test",
       Some("desc"),
@@ -25,13 +89,19 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
       Some(datacenters(0).id)
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
+
+    MonitoringPolicy.addServers(createdMonitoringPolicy.id, AddServersRequest(Seq(fixedServer.id)))
   }
 
   override def afterAll(): Unit = {
     super.afterAll()
     if (fixedServer != null) {
+      Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
       Server.delete(fixedServer.id)
+    }
+    if (createdMonitoringPolicy != null) {
+      MonitoringPolicy.delete(createdMonitoringPolicy.id)
     }
   }
   var mcs: Seq[Monitoringcenter] = Seq.empty
@@ -46,12 +116,10 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
     //add one day from today
 
     var dt = new Date()
-    val c = Calendar.getInstance
+    val c  = Calendar.getInstance
     c.setTime(dt)
     c.add(Calendar.DATE, 1)
     var tommorow = c.getTime()
-
-    //todo: add monitoring policy on server and fix the overall enums
 
     var mc = Monitoringcenter.get(
       fixedServer.id,

@@ -1,11 +1,10 @@
 package oneandone.images
-import oneandone.datacenters.Datacenter
-import oneandone.servers.Hdds
+import oneandone.images.Frequency.Frequency
 
 case class ImageRequest(
     serverId: String,
     name: String,
-    frequency: String,
+    frequency: Frequency,
     numImages: Int,
     description: Option[String] = None,
     datacenterId: Option[String] = None,

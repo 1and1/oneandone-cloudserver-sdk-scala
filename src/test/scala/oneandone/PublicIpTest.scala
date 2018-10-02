@@ -1,12 +1,12 @@
 package oneandone
-import oneandone.publicips.{PublicIp, PublicIpRequest}
-import oneandone.servers.{Hardware, Server, ServerRequest}
+import oneandone.publicips.{IPType, PublicIp, PublicIpRequest}
+import oneandone.servers.GeneralState
 import org.scalatest.FunSuite
 
 class PublicIpTest extends FunSuite {
-  implicit val client = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
+  implicit val client          = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
   var publicIps: Seq[PublicIp] = Seq.empty
-  var testPublicIp: PublicIp = null
+  var testPublicIp: PublicIp   = null
 
   test("List PublicIp") {
     publicIps = PublicIp.list()
@@ -16,11 +16,11 @@ class PublicIpTest extends FunSuite {
   test("Create PublicIp") {
 
     var request = PublicIpRequest(
-      `type` = Some("IPV4")
+      `type` = Some(IPType.IPV4)
     )
 
     testPublicIp = PublicIp.createPublicIp(request)
-    PublicIp.waitPublicIpStatus(testPublicIp.id, "ACTIVE")
+    PublicIp.waitPublicIpStatus(testPublicIp.id, GeneralState.ACTIVE)
 
   }
 
@@ -33,7 +33,7 @@ class PublicIpTest extends FunSuite {
 
     var publicIp = PublicIp.updatePublicIp(testPublicIp.id, "test.com")
     assert(publicIp.reverseDns.get == "test.com")
-    PublicIp.waitPublicIpStatus(testPublicIp.id, "ACTIVE")
+    PublicIp.waitPublicIpStatus(testPublicIp.id, GeneralState.ACTIVE)
   }
 
   test("Delete PublicIp") {

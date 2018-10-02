@@ -1,16 +1,16 @@
 package oneandone
 import oneandone.firewallpolicies._
-import oneandone.servers.{Hardware, Server, ServerRequest}
+import oneandone.servers.{FirewallPolicy => _, _}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
-  implicit val client = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
+  implicit val client                       = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
   var firewallPolicies: Seq[FirewallPolicy] = Seq.empty
-  var fixedServer: Server = null
-  val smallServerInstance: String = "81504C620D98BCEBAA5202D145203B4B"
-  var testFP: FirewallPolicy = null
-  var testRule: Rule = null
-  var datacenters = oneandone.datacenters.Datacenter.list()
+  var fixedServer: Server                   = null
+  val smallServerInstance: String           = "81504C620D98BCEBAA5202D145203B4B"
+  var testFP: FirewallPolicy                = null
+  var testRule: Rule                        = null
+  var datacenters                           = oneandone.datacenters.Datacenter.list()
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -25,7 +25,7 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
       Some(datacenters(0).id)
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, "POWERED_ON")
+    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
   }
 
   override def afterAll(): Unit = {
@@ -35,7 +35,7 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
       Server.waitServerDeleted(fixedServer.id)
     }
     if (testFP != null) {
-      FirewallPolicy.waitFirewallPolicyStatus(testFP.id, "ACTIVE")
+      FirewallPolicy.waitFirewallPolicyStatus(testFP.id, GeneralState.ACTIVE)
       FirewallPolicy.delete(testFP.id)
     }
   }
@@ -45,12 +45,12 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
     var request = FirewallPolicyRequest(
       name = "test scala FP",
       rules = Seq[RuleRequest](
-        RuleRequest("TCP", "8080")
+        RuleRequest(Protocol.TCP, "8080")
       )
     )
 
     testFP = FirewallPolicy.createFirewallPolicy(request)
-    FirewallPolicy.waitFirewallPolicyStatus(testFP.id, "ACTIVE")
+    FirewallPolicy.waitFirewallPolicyStatus(testFP.id, GeneralState.ACTIVE)
 
   }
 
@@ -72,15 +72,15 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
     )
     var bs = FirewallPolicy.updateFirewallPolicy(testFP.id, updateRequest)
     assert(bs.name == "new name scala test")
-    FirewallPolicy.waitFirewallPolicyStatus(testFP.id, "ACTIVE")
+    FirewallPolicy.waitFirewallPolicyStatus(testFP.id, GeneralState.ACTIVE)
   }
 
   test("Attach Firewall policy to server ip ") {
 
     fixedServer = Server.get(fixedServer.id)
     var request = Seq(fixedServer.ips.get(0).id)
-    var result = FirewallPolicy.assignToServerIps(testFP.id, request)
-    FirewallPolicy.waitFirewallPolicyStatus(testFP.id, "ACTIVE")
+    var result  = FirewallPolicy.assignToServerIps(testFP.id, request)
+    FirewallPolicy.waitFirewallPolicyStatus(testFP.id, GeneralState.ACTIVE)
     assert(result.serverIps.get.size > 0)
   }
 
@@ -98,11 +98,11 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
 
   test("Add rule") {
 
-    var request = Seq(RuleRequest("TCP", "9000"))
-    var result = FirewallPolicy.assignRules(testFP.id, request)
+    var request = Seq(RuleRequest(Protocol.TCP, "9000"))
+    var result  = FirewallPolicy.assignRules(testFP.id, request)
     println(result.rules.get)
     testRule = result.rules.get(1)
-    FirewallPolicy.waitFirewallPolicyStatus(testFP.id, "ACTIVE")
+    FirewallPolicy.waitFirewallPolicyStatus(testFP.id, GeneralState.ACTIVE)
     assert(result.rules.get.size > 1)
   }
 
