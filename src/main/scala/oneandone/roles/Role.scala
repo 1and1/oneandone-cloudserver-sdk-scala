@@ -1,5 +1,6 @@
 package oneandone.roles
 
+import oneandone.servers.GeneralState.GeneralState
 import oneandone.{BasicResource, BooleanCustomSerializer, OneandoneClient, Path}
 import org.json4s.{DefaultFormats, Formats}
 import org.json4s.native.JsonMethods._

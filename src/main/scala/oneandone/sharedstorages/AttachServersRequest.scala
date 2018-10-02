@@ -1,5 +1,5 @@
 package oneandone.sharedstorages
 
 case class AttachServersRequest(
-    servers: Seq[ServerRequest]
+    servers: Seq[SharedStorageServerRequest]
 ) {}

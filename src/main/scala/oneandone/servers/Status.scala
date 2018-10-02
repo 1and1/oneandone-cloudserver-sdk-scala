@@ -27,6 +27,12 @@ object ServerAction extends Enumeration {
   val REBOOT    = Value("REBOOT")
 }
 
+object ActionMethod extends Enumeration {
+  type ActionMethod = Value
+  val SOFTWARE  = Value("SOFTWARE")
+  val HARDWARE = Value("HARDWARE")
+}
+
 object GeneralState extends Enumeration {
   type GeneralState = Value
   val ACTIVE  = Value("ACTIVE")

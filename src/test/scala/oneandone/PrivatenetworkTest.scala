@@ -46,7 +46,7 @@ class PrivatenetworkTest extends FunSuite with BeforeAndAfterAll {
     }
     Server.waitServerDeleted(serverId)
     if (testPn != null) {
-      Privatenetwork.waitPrivatenetworkStatus(testPn.id, "ACTIVE")
+      Privatenetwork.waitPrivatenetworkStatus(testPn.id, GeneralState.ACTIVE)
       Privatenetwork.delete(testPn.id)
     }
   }
@@ -59,7 +59,7 @@ class PrivatenetworkTest extends FunSuite with BeforeAndAfterAll {
     )
 
     testPn = Privatenetwork.createPrivatenetwork(request)
-    Privatenetwork.waitPrivatenetworkStatus(testPn.id, "ACTIVE")
+    Privatenetwork.waitPrivatenetworkStatus(testPn.id, GeneralState.ACTIVE)
 
   }
 
@@ -76,7 +76,7 @@ class PrivatenetworkTest extends FunSuite with BeforeAndAfterAll {
   test("attach server") {
 
     var bs = Privatenetwork.attachServer(testPn.id, Seq(fixedServer.id))
-    Privatenetwork.waitPrivatenetworkStatus(testPn.id, "ACTIVE")
+    Privatenetwork.waitPrivatenetworkStatus(testPn.id, GeneralState.ACTIVE)
     bs = Privatenetwork.get(testPn.id)
     assert(bs.servers.get(0).id == fixedServer.id)
 
@@ -96,7 +96,7 @@ class PrivatenetworkTest extends FunSuite with BeforeAndAfterAll {
   test("detach server") {
     var bs = Privatenetwork.detachServer(testPn.id, fixedServer.id)
     assert(bs.servers == None)
-    Privatenetwork.waitPrivatenetworkStatus(testPn.id, "ACTIVE")
+    Privatenetwork.waitPrivatenetworkStatus(testPn.id, GeneralState.ACTIVE)
   }
 
   test("Update Privatenetwork") {
@@ -105,15 +105,17 @@ class PrivatenetworkTest extends FunSuite with BeforeAndAfterAll {
     )
     var bs = Privatenetwork.updatePrivatenetwork(testPn.id, updateRequest)
     assert(bs.name == "updated name")
-    Privatenetwork.waitPrivatenetworkStatus(testPn.id, "ACTIVE")
+    Privatenetwork.waitPrivatenetworkStatus(testPn.id, GeneralState.ACTIVE)
   }
 
   test("attach server from server class") {
 
     var attachedServer = Server.assignPrivateNetwork(fixedServer.id, testPn.id)
-    Privatenetwork.waitPrivatenetworkStatus(testPn.id, "ACTIVE")
+    Privatenetwork.waitPrivatenetworkStatus(testPn.id, GeneralState.ACTIVE)
     Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
-    assert(attachedServer.privateNetworks.get.size > 0)
+    Privatenetwork.waitPrivatenetworkStatus(testPn.id, GeneralState.ACTIVE)
+    var updated = Server.get(fixedServer.id)
+    assert(updated.privateNetworks.get.size > 0)
   }
 
   test("server list attached private netowrks") {
@@ -128,7 +130,9 @@ class PrivatenetworkTest extends FunSuite with BeforeAndAfterAll {
 
   test("Server detach private network") {
     var pns = Server.deletePrivateNetwork(fixedServer.id, testPn.id)
-    assert(pns.privateNetworks == None)
+    Privatenetwork.waitPrivatenetworkStatus(testPn.id, GeneralState.ACTIVE)
+    var updated = Privatenetwork.get(testPn.id)
+    assert(updated.servers == None)
   }
 
 }

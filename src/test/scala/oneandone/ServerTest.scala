@@ -1,6 +1,7 @@
 package oneandone
-import oneandone.firewallpolicies.{FirewallPolicy, FirewallPolicyRequest}
-import oneandone.loadbalancers.{Loadbalancer, LoadbalancerRequest, RuleRequest}
+import oneandone.firewallpolicies.{FirewallPolicy, FirewallPolicyRequest, Protocol}
+import oneandone.loadbalancers._
+import oneandone.publicips.PublicIp
 import oneandone.servers._
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
@@ -22,13 +23,13 @@ class ServerTest extends FunSuite with BeforeAndAfterAll {
 
     var request = LoadbalancerRequest(
       name = "test scala LB",
-      healthCheckTest = "TCP",
+      healthCheckTest = HealthCheckTest.TCP,
       healthCheckInterval = 40,
       persistence = true,
       persistenceTime = 1200,
-      method = "ROUND_ROBIN",
+      method = Method.ROUND_ROBIN,
       rules = Seq[RuleRequest](
-        RuleRequest("TCP", 80, 80)
+        RuleRequest(LoadBalancerProtocol.TCP, 80, 80)
       ),
       datacenterId = Some(datacenters(0).id)
     )
@@ -39,7 +40,7 @@ class ServerTest extends FunSuite with BeforeAndAfterAll {
     var fwrequest = FirewallPolicyRequest(
       name = "test scala FP",
       rules = Seq[oneandone.firewallpolicies.RuleRequest](
-        oneandone.firewallpolicies.RuleRequest("TCP", "8080")
+        oneandone.firewallpolicies.RuleRequest(Protocol.TCP, "8080")
       )
     )
 
@@ -79,7 +80,7 @@ class ServerTest extends FunSuite with BeforeAndAfterAll {
   test("Create custom hardware server") {
 
     var request = ServerRequest(
-      "custom scala testDD",
+      "custom scala test2",
       Some("desc"),
       Hardware(
         None,
@@ -100,7 +101,7 @@ class ServerTest extends FunSuite with BeforeAndAfterAll {
   }
 
   test("Modify server information") {
-    val updatedName    = "custom server updated nameDD"
+    val updatedName    = "custom server updated name"
     var modifiedServer = Server.modifyServerInformation(customServer.id, updatedName, updatedName)
     Server.waitServerStatus(customServer.id, ServerState.POWERED_ON)
     assert(modifiedServer.name == updatedName)
@@ -124,45 +125,29 @@ class ServerTest extends FunSuite with BeforeAndAfterAll {
 
   test("Get Server status") {
     var server = Server.getServerStauts(customServer.id)
-    assert(server.state == ServerState.POWERED_ON)
+    assert(server.state.toString == ServerState.POWERED_ON.toString)
   }
 
   test("Stop Server") {
-    var server = Server.updateStatus(customServer.id, ServerAction.POWER_OFF, "SOFTWARE")
+    var server =
+      Server.updateStatus(customServer.id, ServerAction.POWER_OFF, ActionMethod.SOFTWARE)
     Server.waitServerStatus(customServer.id, ServerState.POWERED_OFF)
     server = Server.get(customServer.id)
-    assert(server.status.state == "POWERED_OFF")
+    assert(server.status.state.toString == ServerState.POWERED_OFF.toString)
   }
 
   test("Start Server") {
-    var server = Server.updateStatus(customServer.id, ServerAction.POWER_ON, "SOFTWARE")
+    var server = Server.updateStatus(customServer.id, ServerAction.POWER_ON, ActionMethod.SOFTWARE)
     Server.waitServerStatus(customServer.id, ServerState.POWERED_ON)
     server = Server.get(customServer.id)
-    assert(server.status.state == ServerState.POWERED_ON)
+    assert(server.status.state.toString == ServerState.POWERED_ON.toString)
   }
 
   test("Reboot Server") {
-    var server = Server.updateStatus(customServer.id, ServerAction.REBOOT, "SOFTWARE")
+    var server = Server.updateStatus(customServer.id, ServerAction.REBOOT, ActionMethod.SOFTWARE)
     Server.waitServerStatus(customServer.id, ServerState.POWERED_ON)
     server = Server.get(customServer.id)
-    assert(server.status.state == ServerState.POWERED_ON)
-  }
-
-  test("Load Server DVD") {
-    var dvd = Server.loadDvd(fixedServer.id, "57C757F413B340B7056B97C0613B6CCA")
-    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
-    assert(dvd != null)
-  }
-
-  test("Get Server DVD") {
-    var dvd = Server.getServerDvd(fixedServer.id)
-    assert(dvd != null)
-  }
-
-  test("Unload Server DVD") {
-    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
-    var dvd = Server.unloadDvd(fixedServer.id)
-    assert(dvd != null)
+    assert(server.status.state.toString == (ServerState.POWERED_ON.toString))
   }
 
   test("Get Server Hardware") {
@@ -190,7 +175,7 @@ class ServerTest extends FunSuite with BeforeAndAfterAll {
     )
 
     var serverHdd = Server.addHddToServer(customServer.id, newHdds)
-    Server.waitServerStatus(customServer.id, ServerState.POWERED_ON)
+    Server.waitServerStatusAndPercentage(customServer.id, ServerState.POWERED_ON)
     serverHdd = Server.get(customServer.id)
     assert(serverHdd.hardware.hdds.get.size == 2)
   }
@@ -202,32 +187,25 @@ class ServerTest extends FunSuite with BeforeAndAfterAll {
     Server.waitServerStatus(customServer.id, ServerState.POWERED_ON)
     assert(serverHdd.hardware.hdds.get.size == 2)
   }
+
   test("Delete server hdds") {
     serverHdds = Server.getServerHdds(customServer.id)
-    var hddId     = serverHdds(1).id
-    var serverHdd = Server.deleteServerSingleHdd(customServer.id, hddId.get)
+    var hddToremove = ""
+    for (hdd <- serverHdds) {
+      if (!hdd.isMain) {
+        hddToremove = hdd.id.get
+      }
+    }
+    var serverHdd = Server.deleteServerSingleHdd(customServer.id, hddToremove)
     Server.waitServerStatus(customServer.id, ServerState.POWERED_ON)
     assert(serverHdds.size > 0)
   }
 
-  test("Get Server image ") {
-    var instance = Server.getServerImage(fixedServer.id)
-    assert(instance.id != null)
-  }
-
-  test("Reinstall Server Image") {
-    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
-    var request = ReinstallImageRequest("753E3C1F859874AA74EB63B3302601F5")
-    var image   = Server.reinstallServersImage(fixedServer.id, request)
-    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
-    assert(image.id != null)
-  }
-
   test("Stop Server again") {
-    var server = Server.updateStatus(customServer.id, ServerAction.POWER_OFF, "HARDWARE")
+    var server = Server.updateStatus(customServer.id, ServerAction.POWER_OFF, ActionMethod.HARDWARE)
     Server.waitServerStatus(customServer.id, ServerState.POWERED_OFF)
     server = Server.get(customServer.id)
-    assert(server.status.state == ServerState.POWERED_OFF)
+    assert(server.status.state.toString == ServerState.POWERED_OFF.toString)
   }
 
   test("Update server hardware") {
@@ -236,44 +214,13 @@ class ServerTest extends FunSuite with BeforeAndAfterAll {
       vcore = Some(2),
       ram = Some(4))
     var server = Server.updateServerHardware(customServer.id, request)
-    Server.waitServerStatus(customServer.id, ServerState.POWERED_OFF)
+    Server.waitServerStatusAndPercentage(customServer.id, ServerState.POWERED_OFF)
     server = Server.get(customServer.id)
-    assert(server.status.state == "POWERED_OFF")
+    assert(server.status.state.toString == ServerState.POWERED_OFF.toString)
     assert(server.hardware.coresPerProcessor.get == 2.0)
     assert(server.hardware.ram.get == 4.0)
   }
 
-  test("List fixed instances ") {
-    fixedInstances = Server.listFixedInstances()
-    assert(fixedInstances.size > 0)
-  }
-
-  test("Get fixed instance ") {
-    var instance = Server.getFixedInstance(fixedInstances(0).id)
-    assert(instance.id == fixedInstances(0).id)
-  }
-
-  test("Create server snapshot") {
-    var server = Server.createSnapshot(customServer.id)
-    Server.waitServerStatus(customServer.id, ServerState.POWERED_OFF)
-  }
-
-  var snapshotId = ""
-  test("Get server snapshot") {
-    var snapshot = Server.getSnapshots(customServer.id)
-    snapshotId = snapshot.id
-    Server.waitServerStatus(customServer.id, ServerState.POWERED_OFF)
-  }
-
-  test("Restore server snapshot") {
-    var snapshot = Server.restoreSnapshot(customServer.id, snapshotId)
-    Server.waitServerStatus(customServer.id, ServerState.POWERED_OFF)
-  }
-
-  test("Delete server snapshot") {
-    var snapshot = Server.deleteSnapshot(customServer.id, snapshotId)
-    Server.waitServerStatus(customServer.id, ServerState.POWERED_OFF)
-  }
   var ips: Seq[Ips] = null
   test("List server IPS") {
     ips = Server.listServerIps(fixedServer.id)
@@ -293,11 +240,6 @@ class ServerTest extends FunSuite with BeforeAndAfterAll {
     var ipData  = Server.getServerIp(fixedServer.id, ipId)
     ip = ipData.id
     assert(ip != null)
-  }
-  var serverClone: Server = null
-  test("Clone server") {
-    serverClone = Server.cloneServer(fixedServer.id, CloneServerRequest(name = "cloned Server"))
-    Server.waitServerStatus(serverClone.id, ServerState.POWERED_ON)
   }
 
   test("Add firewall policy to IP") {
@@ -338,6 +280,7 @@ class ServerTest extends FunSuite with BeforeAndAfterAll {
     var deleteIp = Server.deleteServerIp(fixedServer.id, ip)
     assert(deleteIp.id != null)
     Server.waitServerStatusAndPercentage(fixedServer.id, ServerState.POWERED_ON)
+    PublicIp.waitPublicIpStatus(ip, GeneralState.ACTIVE)
   }
 
   test("Remove Servers") {
@@ -346,9 +289,6 @@ class ServerTest extends FunSuite with BeforeAndAfterAll {
 
     Server.waitServerStatus(customServer.id, ServerState.POWERED_OFF)
     Server.delete(customServer.id)
-    Server.waitServerStatus(serverClone.id, ServerState.POWERED_ON)
-    Server.delete(serverClone.id)
-    Thread.sleep(300000)
     Server.waitServerStatusAndPercentage(fixedServer.id, ServerState.POWERED_ON)
     Server.delete(fixedServer.id)
 

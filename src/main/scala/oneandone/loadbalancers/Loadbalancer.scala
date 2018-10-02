@@ -2,6 +2,7 @@ package oneandone.loadbalancers
 import oneandone.OneandoneClient
 import oneandone.datacenters.Datacenter
 import oneandone.firewallpolicies._
+import oneandone.loadbalancers.Method.Method
 import oneandone.servers.GeneralState.GeneralState
 import org.json4s.Extraction
 import org.json4s.native.JsonMethods.parse
@@ -20,10 +21,24 @@ case class Loadbalancer(
     persistence: Boolean,
     persistenceTime: Double,
     datacenter: Datacenter,
-    method: String,
+    method: Method,
     rules: Option[Seq[Rule]] = None,
     serverIps: Option[Seq[ServerIps]] = None
 ) {}
+
+object Method extends Enumeration {
+  type Method = Value
+  val ROUND_ROBIN = Value("ROUND_ROBIN")
+  val LEAST_CONNECTIONS  = Value("LEAST_CONNECTIONS")
+}
+
+object HealthCheckTest extends Enumeration {
+  type HealthCheckTest = Value
+  val NONE = Value("NONE")
+  val TCP  = Value("TCP")
+  val HTTP = Value("HTTP")
+  val ICMP = Value("ICMP")
+}
 
 object Loadbalancer extends oneandone.Path {
   override val path: Seq[String] = Seq("load_balancers")

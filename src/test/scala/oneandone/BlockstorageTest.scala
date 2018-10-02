@@ -1,5 +1,10 @@
 package oneandone
-import oneandone.blockstorages.{Blockstorage, BlockstorageRequest, UpdateBlockstorageRequest}
+import oneandone.blockstorages.{
+  Blockstorage,
+  BlockstorageRequest,
+  StorageState,
+  UpdateBlockstorageRequest
+}
 import oneandone.servers._
 import org.scalatest.FunSuite
 
@@ -20,7 +25,7 @@ class BlockstorageTest extends FunSuite {
     )
 
     testBs = Blockstorage.createBlockstorage(request)
-    Blockstorage.waitBlockstorageStatus(testBs.id, "POWERED_ON")
+    Blockstorage.waitBlockstorageStatus(testBs.id, StorageState.POWERED_ON)
 
   }
 
@@ -51,7 +56,7 @@ class BlockstorageTest extends FunSuite {
 
     var bs = Blockstorage.attachServer(testBs.id, fixedServer.id)
     assert(bs.server.get.id == fixedServer.id)
-    Blockstorage.waitBlockstorageStatus(testBs.id, "POWERED_ON")
+    Blockstorage.waitBlockstorageStatus(testBs.id, StorageState.POWERED_ON)
   }
 
   test("Get attached server") {
@@ -62,7 +67,7 @@ class BlockstorageTest extends FunSuite {
   test("detach server") {
     var bs = Blockstorage.detachServer(testBs.id)
     assert(bs.server == None)
-    Blockstorage.waitBlockstorageStatus(testBs.id, "POWERED_ON")
+    Blockstorage.waitBlockstorageStatus(testBs.id, StorageState.POWERED_ON)
   }
 
   test("Update Blockstorage") {
@@ -71,7 +76,7 @@ class BlockstorageTest extends FunSuite {
     )
     var bs = Blockstorage.updateBlockstorage(testBs.id, updateRequest)
     assert(bs.name == "updated name")
-    Blockstorage.waitBlockstorageStatus(testBs.id, "POWERED_ON")
+    Blockstorage.waitBlockstorageStatus(testBs.id, StorageState.POWERED_ON)
   }
 
   test("Delete Blockstorage") {

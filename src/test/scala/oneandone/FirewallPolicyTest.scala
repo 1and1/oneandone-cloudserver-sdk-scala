@@ -45,7 +45,7 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
     var request = FirewallPolicyRequest(
       name = "test scala FP",
       rules = Seq[RuleRequest](
-        RuleRequest("TCP", "8080")
+        RuleRequest(Protocol.TCP, "8080")
       )
     )
 
@@ -98,7 +98,7 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
 
   test("Add rule") {
 
-    var request = Seq(RuleRequest("TCP", "9000"))
+    var request = Seq(RuleRequest(Protocol.TCP, "9000"))
     var result  = FirewallPolicy.assignRules(testFP.id, request)
     println(result.rules.get)
     testRule = result.rules.get(1)

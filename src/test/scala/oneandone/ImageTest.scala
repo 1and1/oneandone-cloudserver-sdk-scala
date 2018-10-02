@@ -1,5 +1,5 @@
 package oneandone
-import oneandone.images.{Image, ImageRequest, UpdateImageRequest}
+import oneandone.images.{Frequency, Image, ImageRequest, UpdateImageRequest}
 import oneandone.servers.{Hardware, Server, ServerRequest, ServerState}
 import org.scalatest.FunSuite
 
@@ -31,7 +31,7 @@ class ImageTest extends FunSuite {
     var request = ImageRequest(
       serverId = fixedServer.id,
       name = "scala test image",
-      frequency = "ONCE",
+      frequency = Frequency.ONCE,
       numImages = 1
     )
 

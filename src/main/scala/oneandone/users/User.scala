@@ -2,7 +2,7 @@ package oneandone.users
 
 import oneandone.{BasicResource, OneandoneClient}
 import oneandone.roles.Permission
-
+import oneandone.servers.GeneralState.GeneralState
 import org.json4s.{DefaultFormats, Extraction, Formats}
 import org.json4s.JsonDSL._
 import org.json4s.native.JsonMethods._
@@ -12,7 +12,7 @@ case class User(
     name: String,
     description: Option[String],
     email: Option[String],
-    state: String,
+    state: GeneralState,
     creationDate: String,
     api: Api,
     role: BasicResource
@@ -107,7 +107,7 @@ object User extends oneandone.Path {
     json.extract[Permission]
   }
 
-  def waitUserStatus(id: String, status: String)(
+  def waitUserStatus(id: String, status: GeneralState)(
       implicit client: OneandoneClient
   ): Boolean = {
     Thread.sleep(2000)

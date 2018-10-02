@@ -2,6 +2,7 @@ package oneandone.servers
 
 import oneandone.OneandoneClient
 import oneandone.privatenetworks.Privatenetwork
+import oneandone.servers.ActionMethod.ActionMethod
 import oneandone.servers.ServerAction.ServerAction
 import oneandone.servers.ServerState.ServerState
 import org.json4s.Extraction
@@ -82,7 +83,6 @@ object Server extends oneandone.Path {
     json.extract[BaremetalModel]
   }
 
-  //todo: add server baremetal tests
   def createCloud(request: ServerRequest)(implicit client: OneandoneClient): Server = {
 
     val response = client.post(path, Extraction.decompose(request).snakizeKeys)
@@ -258,12 +258,12 @@ object Server extends oneandone.Path {
     json.extract[IdNameFields]
   }
 
-  def updateStatus(id: String, action: ServerAction, method: String)(
+  def updateStatus(id: String, action: ServerAction, method: ActionMethod)(
       implicit client: OneandoneClient
   ): Server = {
     val request =
       ("action"   -> action.toString) ~
-        ("method" -> method)
+        ("method" -> method.toString)
 
     val response =
       client.put(
@@ -388,7 +388,7 @@ object Server extends oneandone.Path {
     var response = client.get(path :+ id)
     var json     = parse(response).camelizeKeys
     var srvr     = json.extract[Server]
-    while (srvr.status.state != status) {
+    while (srvr.status.state.toString != status.toString) {
       Thread.sleep(8000)
       response = client.get(path :+ id)
       json = parse(response).camelizeKeys
@@ -403,7 +403,7 @@ object Server extends oneandone.Path {
     var response = client.get(path :+ id)
     var json     = parse(response).camelizeKeys
     var srvr     = json.extract[Server]
-    while (srvr.status.state != status || srvr.status.percent != None) {
+    while (srvr.status.state.toString != status.toString || srvr.status.percent != None) {
       Thread.sleep(8000)
       response = client.get(path :+ id)
       json = parse(response).camelizeKeys

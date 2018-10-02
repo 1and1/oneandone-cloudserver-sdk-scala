@@ -1,14 +1,16 @@
 package oneandone.blockstorages
 import oneandone.OneandoneClient
+import oneandone.blockstorages.StorageState.StorageState
 import oneandone.datacenters.Datacenter
+import oneandone.servers.GeneralState.{GeneralState}
 import oneandone.servers.IdNameFields
 import org.json4s.native.JsonMethods.parse
-import org.json4s.{DefaultFormats, Extraction, Formats}
+import org.json4s.{Extraction}
 
 case class Blockstorage(
     id: String,
     size: Double,
-    state: String,
+    state: StorageState,
     description: String,
     datacenter: Datacenter,
     name: String,
@@ -16,21 +18,26 @@ case class Blockstorage(
     server: Option[IdNameFields] = None
 ) {}
 
+object StorageState extends Enumeration {
+  type StorageState = Value
+  val POWERED_ON = Value("POWERED_ON")
+}
+
 object Blockstorage extends oneandone.Path {
   override val path: Seq[String] = Seq("block_storages")
-  var bsServersPath = "server"
+  var bsServersPath              = "server"
 
   def list(
       queryParameters: Map[String, String] = Map.empty
   )(implicit client: OneandoneClient): Seq[Blockstorage] = {
     val response = client.get(path, queryParameters)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Seq[Blockstorage]]
   }
 
   def get(id: String)(implicit client: OneandoneClient): Blockstorage = {
     val response = client.get(path :+ id)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Blockstorage]
   }
 
@@ -39,7 +46,7 @@ object Blockstorage extends oneandone.Path {
   )(implicit client: OneandoneClient): Blockstorage = {
 
     val response = client.post(path, Extraction.decompose(request).snakizeKeys)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Blockstorage]
   }
 
@@ -48,14 +55,14 @@ object Blockstorage extends oneandone.Path {
   ): Blockstorage = {
 
     val response = client.put(path :+ id, Extraction.decompose(request).snakizeKeys)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Blockstorage]
   }
 
   def attachServer(id: String, serverId: String)(implicit client: OneandoneClient): Blockstorage = {
     val request =
-    ("server_id" ->
-    serverId)
+      ("server_id" ->
+        serverId)
     val response =
       client.post(path :+ id :+ bsServersPath, Extraction.decompose(request).snakizeKeys)
     val json = parse(response).camelizeKeys
@@ -64,7 +71,7 @@ object Blockstorage extends oneandone.Path {
 
   def detachServer(id: String)(implicit client: OneandoneClient): Blockstorage = {
     val response = client.delete(path :+ id :+ bsServersPath)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[Blockstorage]
   }
 
@@ -72,7 +79,7 @@ object Blockstorage extends oneandone.Path {
       implicit client: OneandoneClient
   ): IdNameFields = {
     val response = client.get(path :+ id :+ bsServersPath)
-    val json = parse(response).camelizeKeys
+    val json     = parse(response).camelizeKeys
     json.extract[IdNameFields]
   }
 
@@ -80,12 +87,12 @@ object Blockstorage extends oneandone.Path {
     val response = client.delete(path :+ id)
   }
 
-  def waitBlockstorageStatus(id: String, status: String)(
+  def waitBlockstorageStatus(id: String, status: StorageState)(
       implicit client: OneandoneClient
   ): Boolean = {
     var response = client.get(path :+ id)
-    var json = parse(response).camelizeKeys
-    var bs = json.extract[Blockstorage]
+    var json     = parse(response).camelizeKeys
+    var bs       = json.extract[Blockstorage]
     while (bs.state != status) {
       Thread.sleep(8000)
       response = client.get(path :+ id)

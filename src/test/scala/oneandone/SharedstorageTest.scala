@@ -1,15 +1,15 @@
 package oneandone
-import oneandone.servers.{Hardware, Server, ServerRequest, ServerState}
+import oneandone.servers._
 import oneandone.sharedstorages._
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, BeforeAndAfterEach, FunSuite}
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
-  implicit val client = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
+  implicit val client                    = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
   var Sharedstorages: Seq[Sharedstorage] = Seq.empty
-  var fixedServer: Server = null
-  val smallServerInstance: String = "81504C620D98BCEBAA5202D145203B4B"
-  var testss: Sharedstorage = null
-  var datacenters = oneandone.datacenters.Datacenter.list()
+  var fixedServer: Server                = null
+  val smallServerInstance: String        = "81504C620D98BCEBAA5202D145203B4B"
+  var testss: Sharedstorage              = null
+  var datacenters                        = oneandone.datacenters.Datacenter.list()
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -36,7 +36,7 @@ class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
     )
 
     testss = Sharedstorage.createSharedstorage(request)
-    Sharedstorage.waitSharedstorageStatus(testss.id, "ACTIVE")
+    Sharedstorage.waitSharedstorageStatus(testss.id, GeneralState.ACTIVE)
 
   }
 
@@ -57,15 +57,15 @@ class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
     )
     var bs = Sharedstorage.updateSharedstorage(testss.id, updateRequest)
     assert(bs.name == "updated name")
-    Sharedstorage.waitSharedstorageStatus(testss.id, "ACTIVE")
+    Sharedstorage.waitSharedstorageStatus(testss.id, GeneralState.ACTIVE)
   }
 
   test("attach server") {
 
-    Sharedstorage.waitSharedstorageStatus(testss.id, "ACTIVE")
+    Sharedstorage.waitSharedstorageStatus(testss.id, GeneralState.ACTIVE)
     var request = AttachServersRequest(
       servers = Seq(
-        sharedstorages.ServerRequest(
+        sharedstorages.SharedStorageServerRequest(
           id = fixedServer.id,
           rights = "RW"
         )
@@ -73,7 +73,7 @@ class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
     )
     var ss = Sharedstorage.attachServer(testss.id, request)
     assert(ss.servers.size > 0)
-    Sharedstorage.waitSharedstorageStatus(testss.id, "ACTIVE")
+    Sharedstorage.waitSharedstorageStatus(testss.id, GeneralState.ACTIVE)
   }
 
   test("list attached servers") {
@@ -89,7 +89,7 @@ class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
   test("detach server") {
     var bs = Sharedstorage.detachServer(testss.id, fixedServer.id)
     assert(bs.servers.get.size == 0)
-    Sharedstorage.waitSharedstorageStatus(testss.id, "ACTIVE")
+    Sharedstorage.waitSharedstorageStatus(testss.id, GeneralState.ACTIVE)
   }
 
   test("get access information") {
@@ -105,7 +105,7 @@ class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
   override def afterAll(): Unit = {
     super.afterAll()
     if (testss != null) {
-      Sharedstorage.waitSharedstorageStatus(testss.id, "ACTIVE")
+      Sharedstorage.waitSharedstorageStatus(testss.id, GeneralState.ACTIVE)
       Sharedstorage.delete(testss.id)
     }
     if (fixedServer != null) {

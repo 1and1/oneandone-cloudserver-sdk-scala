@@ -1,7 +1,7 @@
 package oneandone
 
 import oneandone.monitoringpolicies._
-import oneandone.servers.{Hardware, Server, ServerRequest, ServerState}
+import oneandone.servers._
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
@@ -21,7 +21,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
   override def beforeAll(): Unit = {
     super.beforeAll()
     var serverRequest = ServerRequest(
-      "Scala monitoring policy test",
+      "Scala monitoring policy test1",
       Some("A very descriptive description"),
       Hardware(
         None,
@@ -95,7 +95,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
     )
 
     var createMonitoringPolicyRequest = MonitoringPolicyRequest(
-      name = "aaScalaSdkTestMonitoringPolicy",
+      name = "aaScalaSdkTestMonitoringPolicy1",
       description =
         Option("Test - monitoring policy created using oneandone-cloudserver-sdk-scala."),
       email = "test@test.com",
@@ -109,7 +109,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
 
     assert(createdMonitoringPolicy != null)
     assert(
-      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, "ACTIVE")
+      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, GeneralState.ACTIVE)
     )
   }
 
@@ -195,7 +195,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
 
     assert(updatedMonitoringPolicy != null)
     assert(
-      true == MonitoringPolicy.waitMonitoringPolicyStatus(updatedMonitoringPolicy.id, "ACTIVE")
+      true == MonitoringPolicy.waitMonitoringPolicyStatus(updatedMonitoringPolicy.id, GeneralState.ACTIVE)
     )
     assert(createdMonitoringPolicy.id == updatedMonitoringPolicy.id)
     assert(updatedMonitoringPolicy.name == "aaScalaSdkTestMonitoringPolicyUpdated")
@@ -214,7 +214,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
 
     assert(response != null)
     assert(
-      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, "ACTIVE")
+      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, GeneralState.ACTIVE)
     )
   }
 
@@ -252,7 +252,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
     )
 
     assert(
-      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, "ACTIVE")
+      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, GeneralState.ACTIVE)
     )
     assert(monitoringPolicy.ports.get(1).alertIf == "RESPONDING")
     assert(monitoringPolicy.ports.get(1).emailNotification == true)
@@ -261,7 +261,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
   test("Delete Monitoring Policy Port") {
     var result = MonitoringPolicy.deletePort(createdMonitoringPolicy.id, monitoringPolicyPort.id)
     assert(result != null)
-    MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, "ACTIVE")
+    MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, GeneralState.ACTIVE)
 
     monitoringPolicyPorts = MonitoringPolicy.listPorts(createdMonitoringPolicy.id)
     assert(monitoringPolicyPorts.length == 1)
@@ -282,7 +282,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
 
     assert(response != null)
     assert(
-      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, "ACTIVE")
+      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, GeneralState.ACTIVE)
     )
   }
 
@@ -320,7 +320,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
     )
 
     assert(
-      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, "ACTIVE")
+      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, GeneralState.ACTIVE)
     )
 
     assert(monitoringPolicy.processes.get(1).alertIf == "NOT_RUNNING")
@@ -331,7 +331,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
     var result =
       MonitoringPolicy.deleteProcess(createdMonitoringPolicy.id, monitoringPolicyProcess.id)
     assert(result != null)
-    MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, "ACTIVE")
+    MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, GeneralState.ACTIVE)
 
     monitoringPolicyProcesses = MonitoringPolicy.listProcesses(createdMonitoringPolicy.id)
     assert(monitoringPolicyProcesses.length == 1)
@@ -344,7 +344,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
     )
 
     assert(
-      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, "ACTIVE")
+      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, GeneralState.ACTIVE)
     )
     assert(result.servers != null)
     assert(result.servers.length > 0)
@@ -361,7 +361,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
     monitoringPolicyServer = MonitoringPolicy.getServer(createdMonitoringPolicy.id, fixedServer.id)
 
     assert(monitoringPolicyServer.id == fixedServer.id)
-    assert(monitoringPolicyServer.name == "Scala monitoring policy test")
+    assert(monitoringPolicyServer.name == "Scala monitoring policy test1")
   }
 
   test("Delete Monitoring Policy Server") {
@@ -370,7 +370,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
 
     assert(result != null)
     assert(
-      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, "ACTIVE")
+      true == MonitoringPolicy.waitMonitoringPolicyStatus(createdMonitoringPolicy.id, GeneralState.ACTIVE)
     )
   }
 

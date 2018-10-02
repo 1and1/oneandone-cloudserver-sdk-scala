@@ -69,21 +69,21 @@ class BaremetalServerTest extends FunSuite {
   }
 
   test("Stop Server") {
-    var server = Server.updateStatus(baremetalServer.id, ServerAction.POWER_OFF, "SOFTWARE")
+    var server = Server.updateStatus(baremetalServer.id, ServerAction.POWER_OFF, ActionMethod.SOFTWARE)
     Server.waitServerStatus(baremetalServer.id, ServerState.POWERED_OFF)
     server = Server.get(baremetalServer.id)
     assert(server.status.state == ServerState.POWERED_OFF)
   }
 
   test("Start Server") {
-    var server = Server.updateStatus(baremetalServer.id, ServerAction.POWER_ON, "SOFTWARE")
+    var server = Server.updateStatus(baremetalServer.id, ServerAction.POWER_ON, ActionMethod.SOFTWARE)
     Server.waitServerStatus(baremetalServer.id, ServerState.POWERED_ON)
     server = Server.get(baremetalServer.id)
     assert(server.status.state == ServerState.POWERED_ON)
   }
 
   test("Reboot Server") {
-    var server = Server.updateStatus(baremetalServer.id, ServerAction.REBOOT, "SOFTWARE")
+    var server = Server.updateStatus(baremetalServer.id, ServerAction.REBOOT, ActionMethod.SOFTWARE)
     Server.waitServerStatus(baremetalServer.id, ServerState.POWERED_ON)
     server = Server.get(baremetalServer.id)
     assert(server.status.state == ServerState.POWERED_ON)
