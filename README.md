@@ -590,6 +590,8 @@ Loadbalancer.createLoadbalancer(request)
 Optional parameters are `HealthCheckPath`, `HealthCheckPathParser`, `Source` and `Description`. Load balancer `Method` must be set to `"ROUND_ROBIN"` or `"LEAST_CONNECTIONS"`.
 
 **Update a load balancer:**
+
+```
  var updateRequest = UpdateLoadbalancerRequest(
       name = Some("new name scala test")
     )
