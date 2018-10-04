@@ -1,11 +1,10 @@
-package oneandone
 import oneandone.firewallpolicies.{FirewallPolicy, FirewallPolicyRequest, Protocol, RuleRequest}
 import oneandone.loadbalancers._
 import oneandone.publicips.{IPType, PublicIp, PublicIpRequest}
 import oneandone.servers._
 
 class Example {
-  implicit val client                = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
+  implicit val client                = oneandone.OneandoneClient(sys.env("ONEANDONE_TOKEN"))
   var datacenters                    = oneandone.datacenters.Datacenter.list()
   var firewallPolicy: FirewallPolicy = null
   var loadBalancer: Loadbalancer     = null
