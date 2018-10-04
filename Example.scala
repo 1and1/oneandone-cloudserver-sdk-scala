@@ -1,3 +1,4 @@
+package example
 import oneandone.firewallpolicies.{FirewallPolicy, FirewallPolicyRequest, Protocol, RuleRequest}
 import oneandone.loadbalancers._
 import oneandone.publicips.{IPType, PublicIp, PublicIpRequest}

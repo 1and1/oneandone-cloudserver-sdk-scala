@@ -1549,14 +1549,14 @@ The example below is a main class in Scala that creates an IP, firewall policy, 
 After the server is created we assign the firewall policy and the load balancer to the server and in the end we clean everything out.
 
 ```Scala
-package oneandone
+package example
 import oneandone.firewallpolicies.{FirewallPolicy, FirewallPolicyRequest, Protocol, RuleRequest}
 import oneandone.loadbalancers._
 import oneandone.publicips.{IPType, PublicIp, PublicIpRequest}
 import oneandone.servers._
 
 class Example {
-  implicit val client                = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
+  implicit val client                = oneandone.OneandoneClient(sys.env("ONEANDONE_TOKEN"))
   var datacenters                    = oneandone.datacenters.Datacenter.list()
   var firewallPolicy: FirewallPolicy = null
   var loadBalancer: Loadbalancer     = null
@@ -1637,5 +1637,6 @@ class Example {
   }
 
 }
+
 
 ```
