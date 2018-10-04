@@ -60,7 +60,7 @@ implicit val client = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
 ```
 
 
-Refer to the [Examples](#examples) and [Operations](#operations) sections for additional information.
+Refer to the [Example](#example) and [Operations](#operations) sections for additional information.
 
 
 ## Operations
