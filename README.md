@@ -1329,22 +1329,22 @@ Role.updateRolePermissions(createdRoleId, permissions)
 **Assign users to a role:**
 
 ```
-
+Role.addUsersToRole(createdRoleId, usersList)
 ```
 
 `usersList` is a String List of user ID's.
 
 **List a role's users:**
 
-``
+`Role.getRoleUsers(createdRoleId)`
 
 **Retrieve information about a role's user:**
 
-``
+`Role.getRoleUser(createdRoleId, userId)`
 
 **Remove a role's user:**
 
-`);`
+`Role.removeRoleUser(createdRoleId, userId)`
 
 
 ### Usages
