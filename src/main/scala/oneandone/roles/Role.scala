@@ -22,6 +22,7 @@ object Role extends Path {
   val serializers = List(BooleanCustomSerializer)
   override implicit lazy val serializerFormats: Formats = DefaultFormats ++ serializers
   var PermissionsPath = "permissions"
+  var UsersPath = "users"
   var ClonePath = "clone"
 
   def list()(implicit client: OneandoneClient): Seq[Role] = {
@@ -77,6 +78,30 @@ object Role extends Path {
     val response = client.get(path :+ roleId :+ PermissionsPath)
     val json = parse(response).camelizeKeys
     json.extract[Permission]
+  }
+
+  def getRoleUsers(roleId: String)(implicit client: OneandoneClient): Seq[BasicResource] = {
+    val response = client.get(path :+ roleId :+ UsersPath)
+    val json = parse(response).camelizeKeys
+    json.extract[Seq[BasicResource]]
+  }
+
+  def addUsersToRole(roleId: String, userIds: Seq[String])(implicit client: OneandoneClient): Role = {
+    val response = client.post(path :+ id :+ UsersPath, Extraction.decompose(userIds).snakizeKeys)
+    val json = parse(response).camelizeKeys
+    json.extract[Role]
+  }
+
+  def getRoleUser(roleId: String, userId: String)(implicit client: OneandoneClient): BasicResource = {
+    val response = client.get(path :+ roleId :+ UsersPath:+ userId)
+    val json = parse(response).camelizeKeys
+    json.extract[BasicResource]
+  }
+
+  def removeRoleUser(roleId: String, userId: String)(implicit client: OneandoneClient): Role = {
+    val response = client.delete(path :+ roleId :+ UsersPath :+ userId)
+    val json     = parse(response).camelizeKeys
+    json.extract[Role]
   }
 
   def cloneRole(
