@@ -1,6 +1,5 @@
 package oneandone.roles
 
-import oneandone.servers.GeneralState.GeneralState
 import oneandone.{BasicResource, BooleanCustomSerializer, OneandoneClient, Path}
 import org.json4s.{DefaultFormats, Formats}
 import org.json4s.native.JsonMethods._
@@ -38,7 +37,7 @@ object Role extends Path {
     json.extract[Role]
   }
 
-  def createRole(
+  def create(
       request: CreateRoleRequest
   )(implicit client: OneandoneClient): Role = {
 
@@ -47,7 +46,7 @@ object Role extends Path {
     json.extract[Role]
   }
 
-  def updateRole(id: String, request: UpdateRoleRequest)(
+  def update(id: String, request: UpdateRoleRequest)(
       implicit client: OneandoneClient
   ): Role = {
     val response = client.put(path :+ id, Extraction.decompose(request).snakizeKeys)
@@ -87,7 +86,7 @@ object Role extends Path {
   }
 
   def addUsersToRole(roleId: String, userIds: Seq[String])(implicit client: OneandoneClient): Role = {
-    val response = client.post(path :+ id :+ UsersPath, Extraction.decompose(userIds).snakizeKeys)
+    val response = client.post(path :+ roleId :+ UsersPath, Extraction.decompose(userIds).snakizeKeys)
     val json = parse(response).camelizeKeys
     json.extract[Role]
   }
@@ -104,7 +103,7 @@ object Role extends Path {
     json.extract[Role]
   }
 
-  def cloneRole(
+  def clone(
       roleId: String,
       request: CloneRoleRequest
   )(implicit client: OneandoneClient): Role = {
@@ -114,7 +113,7 @@ object Role extends Path {
     json.extract[Role]
   }
 
-  def waitRoleStatus(id: String, status: String)(
+  def waitStatus(id: String, status: String)(
       implicit client: OneandoneClient
   ): Boolean = {
     var response = client.get(path :+ id)

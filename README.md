@@ -53,7 +53,7 @@ The official Scala library is available from the 1&1 GitHub account found [here]
 
 ### Authentication
 
-Set the authentication token as an Environment Variable `OAO_TOKEN` and create the API client:
+Set the authentication token as an Environment Variable `ONEANDONE_TOKEN` and create the API client:
 
 ```
 implicit val client = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
@@ -70,15 +70,15 @@ Refer to the [Example](#example) and [Operations](#operations) sections for addi
 
 `Server.list()`
 
-To paginate the list of servers received in the response use `page` and `per_page` parameters. Set `per_page` to the number of servers that will be shown in each page. `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of servers received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set `Map("per_page" -> "1")` to the number of servers that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of servers sorted in expected order pass a server property (e.g. `"name"`) in `sort` parameter.
+To receive the list of servers sorted in expected order pass a server property (e.g. `"name"`) in Map("sort" -> "-name") parameter.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the server instances that contain it.
 
-To retrieve a collection of servers containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,description,hardware.ram"`) in `fields` parameter.
+To retrieve a collection of servers containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,description,hardware.ram"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an empty string, it is ignored in the request.
+If any of the parameters `Map("sort" -> "")`, `Map("q" -> "")` or `Map("fields" -> "")` is set to an empty string, it is ignored in the request.
 
 **Retrieve a single server:**
 
@@ -94,27 +94,27 @@ If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an e
 
 **Retrieve information about a server's hardware:**
 
-`Server.getServerHardware(serverId)`
+`Server.getHardware(serverId)`
 
 **List a server's HDDs:**
 
-`Server.getServerHdds(serverId)`
+`Server.getHdds(serverId)`
 
 **Retrieve a single server HDD:**
 
-`Server.getServersSingleHdd(serverId, hddId.get)`
+`Server.getSingleHdd(serverId, hddId.get)`
 
 **Retrieve information about a server's image:**
 
-`Server.getServerImage(serverId)`
+`Server.getImage(serverId)`
 
 **List a server's IPs:**
 
-`listServerIps(serverId)`
+`Server.listIps(serverId)`
 
 **Retrieve information about a single server IP:**
 
-`Server.listServerIps(serverId)`
+`Server.getIp(serverId)`
 
 **List all firewall policies assigned to a server IP:**
 
@@ -126,11 +126,11 @@ If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an e
 
 **Retrieve information about a server's status:**
 
-`Server.getServerStauts(serverId)`
+`Server.getStatus(serverId)`
 
 **Retrieve information about the DVD loaded into the virtual DVD unit of a server:**
 
-`Server.getServerDvd(serverId)`
+`Server.getDvd(serverId)`
 
 **List a server's private networks:**
 
@@ -159,10 +159,10 @@ var request = ServerRequest(
       applianceId =  "753E3C1F859874AA74EB63B3302601F5"
     )
     customServer = Server.createCloud(request)
-    Server.waitServerStatus(customServerId, ServerState.POWERED_ON)
+    Server.waitStatus(customServerId, ServerState.POWERED_ON)
 ```
 
-**Create a fixed-size server **
+**Create a fixed-size server**
 
 ```
  var request = ServerRequest(
@@ -174,14 +174,27 @@ var request = ServerRequest(
       applianceId = "753E3C1F859874AA74EB63B3302601F5"
     )
     fixedServer = Server.createCloud(request)
-    Server.waitServerStatus(serverId, ServerState.POWERED_ON)
+    Server.waitStatus(serverId, ServerState.POWERED_ON)
+```
+
+**Create a baremetal server**
+
+```
+ var request = BaremetalServerRequest(
+      "Scala Baremetal test",
+      Some("desc"),
+      BaremetalHardwareRequest(
+        baremetalModelId,
+      ),
+      applianceId = serverApplianceId
+    )
+    baremetalServer = Server.createBaremetal(request)
+    Server.waitStatus(baremetalServer.id, ServerState.POWERED_ON)
 ```
 
 **Update a server:**
 
-```
-Server.modifyServerInformation(serverId, updatedName, updatedDescription)
-```
+`Server.modifyInformation(serverId, updatedName, updatedDescription)`
 
 **Delete a server:**
 
@@ -194,36 +207,31 @@ var request = oneandone.servers.UpdateHardwareRequest(
       coresPerProcessor = Some(2),
       vcore = Some(2),
       ram = Some(4))
-var server = Server.updateServerHardware(serverId, request)
+var server = Server.updateHardware(serverId, request)
 ```
 
 **Add new hard disk(s) to a server:**
 
 ```
-Server.waitServerStatus(serverId, ServerState.POWERED_ON)
-    var hdd = HddRequest(60, false)
-    var newHdds = Seq[HddRequest](
-      hdd
-    )
+var hdd = HddRequest(60, false)
+var newHdds = Seq[HddRequest](
+     hdd
+)
 
-var serverHdd = Server.addHddToServer(serverId, newHdds)
+var serverHdd = Server.addHdd(serverId, newHdds)
 ```
 
 **Resize a server's hard disk:**
 
-```
-var serverHdd = Server.updateServerSingleHdd(serverId, hddId, newSizeInt)
-```
+`var serverHdd = Server.updateSingleHdd(serverId, hddId, newSizeInt)`
 
 **Remove a server's hard disk:**
 
-`Server.deleteServerSingleHdd(serverId, hddToremove)`
+`Server.deleteSingleHdd(serverId, hddToremove)`
 
 **Load a DVD into the virtual DVD unit of a server:**
 
-```
-Server.loadDvd(serverId, dvdId)
-```
+`Server.loadDvd(serverId, dvdId)`
 
 **Unload a DVD from the virtual DVD unit of a server:**
 
@@ -237,26 +245,20 @@ var image   = Server.reinstallServersImage(serverId, request)
 
 **Assign a new IP to a server:**
 
-```
-Server.addNewIPToServer(serverId, "IPV4")
-```
+`Server.addNewIP(serverId, "IPV4")`
 
-**Release an IP and optionally remove it from a server:**
+**Release an IP and remove it from a server:**
 
-`Server.deleteServerIp(serverId, ip)`
+`Server.deleteIp(serverId, ip)`
 
 
 **Assign a new firewall policy to a server's IP:**
 
-```
-Server.addFirewallPolicyToServer(serverId, ip, firewallPolicyId)
-```
+`Server.addFirewallPolicy(serverId, ip, firewallPolicyId)`
 
 **Assign a new load balancer to a server's IP:**
 
-```
-Server.addLoadBalancerToServer(serverId, ip, loadBalancerId)
-```
+`Server.addLoadBalancer(serverId, ip, loadBalancerId)`
 
 **Remove a load balancer from a server's IP:**
 
@@ -264,31 +266,21 @@ Server.addLoadBalancerToServer(serverId, ip, loadBalancerId)
 
 **Start a server:**
 
-```
-Server.updateStatus(serverId, ServerAction.POWER_ON, ActionMethod.SOFTWARE)
-```
-
-Set `setMethod` to either for `Types.ServerActionMethod.SOFTWARE` or `Types.ServerActionMethod.HARDWARE`for method of rebooting.
+`Server.updateStatus(serverId, ServerAction.POWER_ON, ActionMethod.SOFTWARE)`
 
 **Reboot a server:**
 
-```
-Server.updateStatus(serverId, ServerAction.REBOOT, ActionMethod.SOFTWARE)
-```
+`Server.updateStatus(serverId, ServerAction.REBOOT, ActionMethod.SOFTWARE)`
 
 Set `ActionMethod` to either for `SOFTWARE` or `HARDWARE`for method of rebooting.
 
 **Shutdown a server:**
 
-```
-Server.updateStatus(serverId, ServerAction.POWER_OFF, ActionMethod.SOFTWARE)
-```
+`Server.updateStatus(serverId, ServerAction.POWER_OFF, ActionMethod.SOFTWARE)`
 
 **Assign a private network to a server:**
 
-```
-Server.assignPrivateNetwork(serverId, privateNetworkId)
-```
+`Server.assignPrivateNetwork(serverId, privateNetworkId)`
 
 **Remove a server's private network:**
 
@@ -308,9 +300,7 @@ Server.assignPrivateNetwork(serverId, privateNetworkId)
 
 **Clone a server:**
 
-```
-Server.cloneServer(serverId, CloneServerRequest(name = "cloned Server"))
-```
+`Server.clone(serverId, CloneServerRequest(name = "cloned Server"))`
 
 
 ### Images
@@ -319,15 +309,15 @@ Server.cloneServer(serverId, CloneServerRequest(name = "cloned Server"))
 
 `Image.list()`
 
-To paginate the list of images received in the response use `page` and `per_page` parameters. set `per_page` to the number of images that will be shown in each page. `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of images received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. set `Map("per_page" -> "1")` to the number of images that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of images sorted in expected order, pass an image property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of images sorted in expected order, pass an image property (e.g. `"name"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
-Use ``Map("q" -> "test")`` to search for a string in the response and return only the elements that contain it.
+Use `Map("q" -> "test")` to search for a string in the response and return only the elements that contain it.
 
-To retrieve a collection of images containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,creation_date"`) in `fields` parameter.
+To retrieve a collection of images containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,creation_date"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an empty string, it is ignored in the request.
+If any of the parameters `Map("sort" -> "")`, `Map("q" -> "")` or `Map("fields" -> "")` is set to an empty string, it is ignored in the request.
 
 **Retrieve a single image:**
 
@@ -343,8 +333,7 @@ var request = ImageRequest(
       frequency = Frequency.ONCE,
       numImages = 1
     )
-
-    testImage = Image.createImage(request)
+Image.create(request)
 ```
 
 All fields except `Description` are required. `Frequency` may be set to `"ONCE"`, `"DAILY"` or `"WEEKLY"`.
@@ -354,8 +343,9 @@ All fields except `Description` are required. `Frequency` may be set to `"ONCE"`
 ```
 var updateRequest = UpdateImageRequest(
       name = "updated Name",
+	  frequency = Some(Frequency.ONCE)
     )
-    var image = Image.updateImage(testImageId, updateRequest)
+Image.update(testImageId, updateRequest)
 ```
 
 `Frequency` may be set to `"ONCE"`, `"DAILY"` or `"WEEKLY"`.
@@ -368,15 +358,15 @@ var updateRequest = UpdateImageRequest(
 
 `Sharedstorage.list()`
 
-To paginate the list of shared storages received in the response use `page` and `per_page` parameters. Set `per_page` to the number of volumes that will be shown in each page. `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of shared storages received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set `Map("per_page" -> "1")` to the number of volumes that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of shared storages sorted in expected order, pass a volume property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of shared storages sorted in expected order, pass a volume property (e.g. `"name"`) in `Map("sort" -> "name")` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
-Use ``Map("q" -> "test")`` parameter to search for a string in the response and return only the volume instances that contain it.
+Use `Map("q" -> "test")` parameter to search for a string in the response and return only the volume instances that contain it.
 
-To retrieve a collection of shared storages containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,size,size_used"`) in `fields` parameter.
+To retrieve a collection of shared storages containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,size,size_used"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an empty string, it is ignored in the request.
+If any of the parameters `Map("sort" -> "")`, `Map("q" -> "")` or `Map("fields" -> "")` is set to an empty string, it is ignored in the request.
 
 **Retrieve a shared storage:**
 
@@ -392,7 +382,7 @@ var request = SharedstorageRequest(
      datacenterId = Some(data-centers)
    )
 
-Sharedstorage.createSharedstorage(request)
+Sharedstorage.create(request)
 ```
 
 `Description` is optional parameter.
@@ -405,7 +395,7 @@ var updateRequest = UpdateSharedstorageRequest(
       name = Some("updated name"),
       size = 100
     )
-Sharedstorage.updateSharedstorage(sharedStorageId, updateRequest)
+Sharedstorage.update(sharedStorageId, updateRequest)
 ```
 All request's parameters are optional.
 
@@ -448,14 +438,12 @@ Sharedstorage.attachServer(sharedStorageId, request)
 
 **Retrieve the credentials for accessing the shared storages:**
 
-`Sharedstorage.getSharedstorageAccess(sharedStorageId)`
+`Sharedstorage.getAccessSettings(sharedStorageId)`
 
 
 **Change the password for accessing the shared storages:**
 
-```
-Sharedstorage.updateSharedstoragePassword(complexPassword)
-```
+`Sharedstorage.updatePassword(complexPassword)`
 
 
 ### Firewall Policies
@@ -464,15 +452,15 @@ Sharedstorage.updateSharedstoragePassword(complexPassword)
 
 `FirewallPolicy.list()`
 
-To paginate the list of firewall policies received in the response use `page` and `per_page` parameters. Set `per_page` to the number of firewall policies that will be shown in each page.  `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of firewall policies received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set `Map("per_page" -> "1")` to the number of firewall policies that will be shown in each page.  `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of firewall policies sorted in expected order, pass a firewall policy property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of firewall policies sorted in expected order, pass a firewall policy property (e.g. `"name"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
-Use ``Map("q" -> "test")`` parameter to search for a string in the response and return only the firewall policy instances that contain it.
+Use `Map("q" -> "test")` parameter to search for a string in the response and return only the firewall policy instances that contain it.
 
-To retrieve a collection of firewall policies containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,creation_date"`) in `fields` parameter.
+To retrieve a collection of firewall policies containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,creation_date"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an empty string, it is ignored in the request.
+If any of the parameters `Map("sort" -> "")`, `Map("q" -> "")` or `Map("fields" -> "")` is set to an empty string, it is ignored in the request.
 
 **Retrieve a single firewall policy:**
 
@@ -489,7 +477,7 @@ var request = FirewallPolicyRequest(
       )
     )
 
-FirewallPolicy.createFirewallPolicy(request)
+FirewallPolicy.create(request)
 ```
 `setSource` and `setDescription` are optional parameters.
 
@@ -500,7 +488,7 @@ FirewallPolicy.createFirewallPolicy(request)
 var updateRequest = UpdateFirewallPolicyRequest(
       name = "new name scala test"
     )
-FirewallPolicy.updateFirewallPolicy(policyId, updateRequest)
+FirewallPolicy.update(policyId, updateRequest)
 ```
 			
 **Delete a firewall policy:**
@@ -551,17 +539,17 @@ FirewallPolicy.assignRules(policyId, request)
 
 **List load balancers:**
 
-`Loadbalancer.list())`
+`Loadbalancer.list()`
 
-To paginate the list of load balancers received in the response use `page` and `per_page` parameters. Set `per_page` to the number of load balancers that will be shown in each page. `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of load balancers received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set `Map("per_page" -> "1")` to the number of load balancers that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of load balancers sorted in expected order, pass a load balancer property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of load balancers sorted in expected order, pass a load balancer property (e.g. `"name"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the load balancer instances that contain it.
 
-To retrieve a collection of load balancers containing only the requested fields, pass a list of comma-separated properties (e.g. `"ip,name,method"`) in `fields` parameter.
+To retrieve a collection of load balancers containing only the requested fields, pass a list of comma-separated properties (e.g. `"ip,name,method"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an empty string, it is ignored in the request.
+If any of the parameters `Map("sort" -> "")`, `Map("q" -> "")` or `Map("fields" -> "")` is set to an empty string, it is ignored in the request.
 
 **Retrieve a single load balancer:**
 
@@ -584,7 +572,7 @@ var request = LoadbalancerRequest(
       datacenterId = Some(datacenterId)
     )
 
-Loadbalancer.createLoadbalancer(request)
+Loadbalancer.create(request)
 
 ```
 Optional parameters are `HealthCheckPath`, `HealthCheckPathParser`, `Source` and `Description`. Load balancer `Method` must be set to `"ROUND_ROBIN"` or `"LEAST_CONNECTIONS"`.
@@ -595,9 +583,7 @@ Optional parameters are `HealthCheckPath`, `HealthCheckPathParser`, `Source` and
  var updateRequest = UpdateLoadbalancerRequest(
       name = Some("new name scala test")
     )
-    var bs = Loadbalancer.updateLoadbalancer(testLBId, updateRequest)
-    assert(bs.name == "new name scala test")
-Loadbalancer.waitLoadbalancerStatus(loadBalancerId, GeneralState.ACTIVE)
+Loadbalancer.updateLoadbalancer(testLBId, updateRequest)
 ```
 All updatable fields are optional.
 
@@ -658,15 +644,15 @@ Loadbalancer.assignRules(loadBalancerId, request)
 
 `PublicIp.list()`
 
-To paginate the list of public IPs received in the response use `page` and `per_page` parameters. Set `per_page` to the number of public IPs that will be shown in each page. `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of public IPs received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set `Map("per_page" -> "1")` to the number of public IPs that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of public IPs sorted in expected order, pass a public IP property (e.g. `"ip"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of public IPs sorted in expected order, pass a public IP property (e.g. `"ip"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the public IP instances that contain it.
 
-To retrieve a collection of public IPs containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,ip,reverse_dns"`) in `fields` parameter.
+To retrieve a collection of public IPs containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,ip,reverse_dns"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an empty string, it is ignored in the request.
+If any of the parameters `Map("sort" -> "")`, `Map("q" -> "")` or `Map("fields" -> "")` is set to an empty string, it is ignored in the request.
 
 
 **Retrieve a single public IP:**
@@ -681,7 +667,7 @@ var request = PublicIpRequest(
       `type` = Some(IPType.IPV4)
     )
 
-PublicIp.createPublicIp(request)
+PublicIp.create(request)
 ```
 
 Both parameters are optional and may be left blank. `ip_type` may be set to `"IPType.IPV4"` or `"IPType.IPV6"`. Presently, only IPV4 is supported.
@@ -689,7 +675,7 @@ Both parameters are optional and may be left blank. `ip_type` may be set to `"IP
 **Update the reverse DNS of a public IP:**
 
 ```
-PublicIp.updatePublicIp(testPublicIpId, "test.com")
+PublicIp.update(testPublicIpId, "test.com")
 ```
 
 If an empty string is passed in `reverseDns,` it removes previous reverse dns of the public IP.
@@ -705,15 +691,15 @@ If an empty string is passed in `reverseDns,` it removes previous reverse dns of
 
 `Privatenetwork.list()`
 
-To paginate the list of private networks received in the response use `page` and `per_page` parameters. Set `per_page` to the number of private networks that will be shown in each page. `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of private networks received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set `Map("per_page" -> "1")` to the number of private networks that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of private networks sorted in expected order pass a private network property (e.g. `"-creation_date"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of private networks sorted in expected order pass a private network property (e.g. `"-creation_date"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the private network instances that contain it.
 
-To retrieve a collection of private networks containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,creation_date"`) in `fields` parameter.
+To retrieve a collection of private networks containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,creation_date"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is blank, it is ignored in the request.
+If any of the parameters Map("sort" -> "-name"), `Map("q" -> "test")` or Map("fields" -> "id,name") is blank, it is ignored in the request.
 
 **Retrieve information about a private network:**
 
@@ -727,7 +713,7 @@ var request = PrivateNetworkRequest(
       datacenterId = Some(dataCenterId)
     )
 
-Privatenetwork.createPrivatenetwork(request)
+Privatenetwork.create(request)
 ```
 Private network `Name` is required parameter.
 
@@ -738,7 +724,7 @@ Private network `Name` is required parameter.
 var updateRequest = oneandone.privatenetworks.UpdatePrivateNetworkRequest(
       name = "updated name"
     )
-Privatenetwork.updatePrivatenetwork(privateNetworkId, updateRequest)
+Privatenetwork.update(privateNetworkId, updateRequest)
 ```
 All parameters in the request are optional.
 
@@ -760,9 +746,7 @@ All parameters in the request are optional.
 
 **Attach servers to a private network:**
 
-```
- Privatenetwork.attachServer(privateNetworkId, Seq(serverId))
-```
+` Privatenetwork.attachServer(privateNetworkId, Seq(serverId))`
 *Note:* Servers cannot be attached to a private network if they currently have a snapshot.
 
 
@@ -778,15 +762,15 @@ All parameters in the request are optional.
 
 `Vpn.list()`
 
-To paginate the list of VPNs received in the response use `page` and `per_page` parameters. Set ` per_page` to the number of VPNs that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
+To paginate the list of VPNs received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set ` per_page` to the number of VPNs that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of VPNs sorted in expected order pass a VPN property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of VPNs sorted in expected order pass a VPN property (e.g. `"name"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the VPN instances that contain it.
 
-To retrieve a collection of VPNs containing only the requested fields pass a list of comma separated properties (e.g. `"id,name,creation_date"`) in `fields` parameter.
+To retrieve a collection of VPNs containing only the requested fields pass a list of comma separated properties (e.g. `"id,name,creation_date"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an empty string, it is ignored in the request.
+If any of the parameters `Map("sort" -> "")`, `Map("q" -> "")` or `Map("fields" -> "")` is set to an empty string, it is ignored in the request.
 
 **Retrieve information about a VPN:**
 
@@ -799,7 +783,7 @@ If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an e
       name = "vpn scala test"
     )
 
-Vpn.createVpn(request)
+Vpn.create(request)
 ```
 
 **Modify a VPN:**
@@ -808,7 +792,7 @@ Vpn.createVpn(request)
 var updateRequest = UpdateVpnRequest(
       name = Some("updated Name"),
     )
-Vpn.updateVpn(testVpnId, updateRequest)
+Vpn.update(testVpnId, updateRequest)
 ```
 
 **Delete a VPN:**
@@ -823,22 +807,22 @@ Vpn.updateVpn(testVpnId, updateRequest)
 
 **List all usages and alerts of monitoring servers:**
 
-`Monitoringcenter.list()`
+`MonitoringCenter.list()`
 
-To paginate the list of server usages received in the response use `page` and `per_page` parameters. Set `per_page` to the number of server usages that will be shown in each page. `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of server usages received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set `Map("per_page" -> "1")` to the number of server usages that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of server usages sorted in expected order, pass a server usage property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of server usages sorted in expected order, pass a server usage property (e.g. `"name"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the usage instances that contain it.
 
-To retrieve a collection of server usages containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,status.state"`) in `fields` parameter.
+To retrieve a collection of server usages containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,status.state"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is blank, it is ignored in the request.
+If any of the parameters Map("sort" -> "-name"), `Map("q" -> "test")` or Map("fields" -> "id,name") is blank, it is ignored in the request.
 
 **Retrieve the usages and alerts for a monitoring server:**
 
 ```
- var mc = Monitoringcenter.get(
+ var mc = MonitoringCenter.get(
       fixedServerId,
       Period.LAST_HOUR
     )
@@ -849,7 +833,7 @@ If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is blank, it i
 **Retrieve the usages and alerts for a monitoring server for a customer period:**
 
 ```
-var mc = Monitoringcenter.get(
+var mc = MonitoringCenter.get(
       fixedServerId,
       Period.CUSTOM,
       today,
@@ -864,15 +848,15 @@ var mc = Monitoringcenter.get(
 
 `MonitoringPolicy.list()`
 
-To paginate the list of monitoring policies received in the response use `page` and `per_page` parameters. Set `per_page` to the number of monitoring policies that will be shown in each page. `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of monitoring policies received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set `Map("per_page" -> "1")` to the number of monitoring policies that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of monitoring policies sorted in expected order, pass a monitoring policy property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of monitoring policies sorted in expected order, pass a monitoring policy property (e.g. `"name"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the monitoring policy instances that contain it.
 
-To retrieve a collection of monitoring policies containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,creation_date"`) in `fields` parameter.
+To retrieve a collection of monitoring policies containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,creation_date"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an empty string, it is ignored in the request.
+If any of the parameters `Map("sort" -> "")`, `Map("q" -> "")` or `Map("fields" -> "")` is set to an empty string, it is ignored in the request.
 
 **Retrieve a single monitoring policy:**
 
@@ -944,7 +928,7 @@ var createMonitoringPolicyRequest = MonitoringPolicyRequest(
   processes = Seq(processRequest)
 )
 
-createdMonitoringPolicy = MonitoringPolicy.createMonitoringPolicy(createMonitoringPolicyRequest)
+createdMonitoringPolicy = MonitoringPolicy.create(createMonitoringPolicyRequest)
 ```
 All fields, except `Description`, are required. `AlertIf` property accepts values `"RESPONDING"`/`"NOT_RESPONDING"` for ports, and `"RUNNING"`/`"NOT_RUNNING"` for processes.
 
@@ -1014,7 +998,7 @@ var updateMonitoringPolicyRequest = MonitoringPolicyRequest(
   processes = Seq(processRequest)
 )
 
-updatedMonitoringPolicy = MonitoringPolicy.updateMonitoringPolicy(
+updatedMonitoringPolicy = MonitoringPolicy.update(
   createdMonitoringPolicyId,
   updateMonitoringPolicyRequest
 )
@@ -1175,15 +1159,15 @@ var result = MonitoringPolicy.addServers(
 
 `User.list()`
 
-To paginate the list of users received in the response use `page` and `per_page` parameters. Set ` per_page` to the number of users that will be shown in each page. `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of users received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set ` per_page` to the number of users that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of users sorted in expected order, pass a user property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of users sorted in expected order, pass a user property (e.g. `"name"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the user instances that contain it.
 
-To retrieve a collection of users containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,creation_date,email"`) in `fields` parameter.
+To retrieve a collection of users containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,creation_date,email"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an empty string, it is ignored in the request.
+If any of the parameters `Map("sort" -> "")`, `Map("q" -> "")` or `Map("fields" -> "")` is set to an empty string, it is ignored in the request.
 
 **Retrieve information about a user:**
 
@@ -1199,7 +1183,7 @@ If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an e
       email = Option("test@scala1cldsrvsdk.com")
     )
 
-createdUser = User.createUser(createUserRequest)
+createdUser = User.create(createUserRequest)
 ```
 
 `Name` and `Password` are required parameters. The password must contain at least 8 characters using uppercase letters, numbers and other special symbols.
@@ -1211,7 +1195,7 @@ var updateUserApiRequest = UpdateUserApiRequest(
   active = true
 )
 
-var userWithUpdatedApi = User.updateUserApi(createdUserId, updateUserApiRequest)
+var userWithUpdatedApi = User.updateApiStatus(createdUserId, updateUserApiRequest)
 ```
 
 All listed fields in the request are optional. `State` can be set to `"ACTIVE"` or `"DISABLED"`.
@@ -1262,15 +1246,15 @@ User.updateUserApi(createdUserId, updateUserApiRequest)
 
 `Role.list()`
 
-To paginate the list of roles received in the response use `page` and `per_page` parameters. Set ` per_page` to the number of roles that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
+To paginate the list of roles received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set ` per_page` to the number of roles that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of roles sorted in expected order pass a role property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of roles sorted in expected order pass a role property (e.g. `"name"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the role instances that contain it.
 
-To retrieve a collection of roles containing only the requested fields pass a list of comma separated properties (e.g. `"id,name,creation_date"`) in `fields` parameter.
+To retrieve a collection of roles containing only the requested fields pass a list of comma separated properties (e.g. `"id,name,creation_date"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an empty string, it is ignored in the request.
+If any of the parameters `Map("sort" -> "")`, `Map("q" -> "")` or `Map("fields" -> "")` is set to an empty string, it is ignored in the request.
 
 **Retrieve information about a role:**
 
@@ -1280,23 +1264,23 @@ If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an e
 
 ```
  var createRoleRequest = CreateRoleRequest("ScalaTestRole")
-Role.createRole(createRoleRequest)
+Role.create(createRoleRequest)
 ```
 
 **Clone a role:**
 
 ```
 var cloneRoleRequest = CloneRoleRequest("ClonedScalaTestRole")
-clonedRole = Role.cloneRole(createdRoleId, cloneRoleRequest)
+clonedRole = Role.clone(createdRoleId, cloneRoleRequest)
 ```
 
 **Modify a role:**
 
 ```
- var updateRoleRequest = UpdateRoleRequest(
-      name = Option("ScalaTestRoleUpdated")
-    )
-    var updatedRole = Role.updateRole(createdRoleId, updateRoleRequest)
+var updateRoleRequest = UpdateRoleRequest(
+     name = Option("ScalaTestRoleUpdated")
+   )
+Role.update(createdRoleId, updateRoleRequest)
 ```
 
 `ACTIVE` and `DISABLE` are valid values for the state.
@@ -1365,15 +1349,15 @@ Role.addUsersToRole(createdRoleId, usersList)
 
 `ServerAppliance.list()`
 
-To paginate the list of server appliances received in the response use `page` and `per_page` parameters. Set `per_page` to the number of server appliances that will be shown in each page. `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of server appliances received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set `Map("per_page" -> "1")` to the number of server appliances that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of server appliances sorted in expected order, pass a server appliance property (e.g. `"os"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of server appliances sorted in expected order, pass a server appliance property (e.g. `"os"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the server appliance instances that contain it.
 
-To retrieve a collection of server appliances containing only the requested fields, pass a list of comma separated properties (e.g. `"id,os,architecture"`) in `fields` parameter.
+To retrieve a collection of server appliances containing only the requested fields, pass a list of comma separated properties (e.g. `"id,os,architecture"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is blank, it is ignored in the request.
+If any of the parameters Map("sort" -> "-name"), `Map("q" -> "test")` or Map("fields" -> "id,name") is blank, it is ignored in the request.
 
 **Retrieve information about specific appliance:**
 
@@ -1386,15 +1370,15 @@ If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is blank, it i
 
 `DvdIso.list()`
 
-To paginate the list of ISO DVDs received in the response use `page` and `per_page` parameters. Set `per_page` to the number of ISO DVDs that will be shown in each page. `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of ISO DVDs received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set `Map("per_page" -> "1")` to the number of ISO DVDs that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of ISO DVDs sorted in expected order, pass a ISO DVD property (e.g. `"type"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of ISO DVDs sorted in expected order, pass a ISO DVD property (e.g. `"type"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the ISO DVD instances that contain it.
 
-To retrieve a collection of ISO DVDs containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,type"`) in `fields` parameter.
+To retrieve a collection of ISO DVDs containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,type"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is blank, it is ignored in the request.
+If any of the parameters Map("sort" -> "-name"), `Map("q" -> "test")` or Map("fields" -> "id,name") is blank, it is ignored in the request.
 
 **Retrieve a specific ISO image:**
 
@@ -1438,15 +1422,15 @@ The response is an Either `PONG`. if the API is running and the token is valid.
 
 `Blockstorage.list()`
 
-To paginate the list of block storages received in the response use `page` and `per_page` parameters. Set `per_page` to the number of block storages that will be shown in each page. `page` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
+To paginate the list of block storages received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set `Map("per_page" -> "1")` to the number of block storages that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less than or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of block storages sorted in expected order, pass a volume property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of block storages sorted in expected order, pass a volume property (e.g. `"name"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the block storage instances that contain it.
 
-To retrieve a collection of block storages containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,size"`) in `fields` parameter.
+To retrieve a collection of block storages containing only the requested fields, pass a list of comma-separated properties (e.g. `"id,name,size"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an empty string, it is ignored in the request.
+If any of the parameters `Map("sort" -> "")`, `Map("q" -> "")` or `Map("fields" -> "")` is set to an empty string, it is ignored in the request.
 
 **Retrieve a block storage:**
 
@@ -1462,7 +1446,7 @@ If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an e
       datacenterId = datacenterId
     )
 
-Blockstorage.createBlockstorage(request)
+Blockstorage.create(request)
 ```
 
 `Description` is optional parameter.
@@ -1475,7 +1459,7 @@ var updateRequest = UpdateBlockstorageRequest(
   name = Some("updated name")
 )
 
-Blockstorage.updateBlockstorage(testBsId, updateRequest)
+Blockstorage.update(testBsId, updateRequest)
 ```
 All request's parameters are optional.
 
@@ -1502,15 +1486,15 @@ Blockstorage.attachServer(testBs.id, fixedServer.id)
 
 `SshKey.list()`
 
-To paginate the list of SshKeys received in the response use `page` and `per_page` parameters. Set ` per_page` to the number of SSH Keys that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
+To paginate the list of SshKeys received in the response use `Map("page" -> "1")` and `Map("per_page" -> "1")` parameters. Set ` per_page` to the number of SSH Keys that will be shown in each page. `Map("page" -> "1")` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
 
-To receive the list of SshKeys sorted in expected order pass an SshKey property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+To receive the list of SshKeys sorted in expected order pass an SshKey property (e.g. `"name"`) in Map("sort" -> "-name") parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
 
 Use `Map("q" -> "test")` parameter to search for a string in the response and return only the SshKey instances that contain it.
 
-To retrieve a collection of SshKeys containing only the requested fields pass a list of comma separated properties (e.g. `"id,name,creation_date"`) in `fields` parameter.
+To retrieve a collection of SshKeys containing only the requested fields pass a list of comma separated properties (e.g. `"id,name,creation_date"`) in `Map("fields" -> "id,name")` parameter.
 
-If any of the parameters `sort`, `Map("q" -> "test")` or `fields` is set to an empty string, it is ignored in the request.
+If any of the parameters `Map("sort" -> "")`, `Map("q" -> "")` or `Map("fields" -> "")` is set to an empty string, it is ignored in the request.
 
 **Retrieve information about an SshKey:**
 
@@ -1524,7 +1508,7 @@ var request = CreateSshKeyRequest(
       description = Option("Testing the creation of ssh key using oneandone-cloudserver-sdk-scala"),
       publicKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDLI86QSeZTbL+ZX0ycke59QetHoTv52puyw50eSgTxmQPpigttjyhKPNBJ/RHwHyD3+/5dWDQRjUwhYfmxqQgA3bYKNggsP1/Eiv/baLW7S9l2w7eVpdR/gSIOjSK5JhHsMsaCb4kJUssxLRv"
     )
-SshKey.createSshKey(request)
+SshKey.create(request)
 ```
 
 **Modify an SshKey:**
@@ -1534,7 +1518,7 @@ var updateRequest = UpdateSshKeyRequest(
       name = "aaScalaSshKeyTestUpdated",
       description = Option("Testing the update of ssh key using oneandone-cloudserver-sdk-scala")
     )
-SshKey.updateSshKey(createdSshKey.id, updateRequest)
+SshKey.update(createdSshKey.id, updateRequest)
 ```
 
 **Delete an SshKey:**
@@ -1559,7 +1543,7 @@ class Example {
   implicit val client                = oneandone.OneandoneClient(sys.env("ONEANDONE_TOKEN"))
   var datacenters                    = oneandone.datacenters.Datacenter.list()
   var firewallPolicy: FirewallPolicy = null
-  var loadBalancer: Loadbalancer     = null
+  var loadBalancer: LoadBalancer     = null
   var exampleIp: PublicIp            = null
   var exampleServer: Server          = null
   var firewallPolicyName             = "example policy"
@@ -1576,8 +1560,8 @@ class Example {
     )
 
     println("creating firewall policy ", firewallPolicyName)
-    firewallPolicy = FirewallPolicy.createFirewallPolicy(request)
-    FirewallPolicy.waitFirewallPolicyStatus(firewallPolicy.id, GeneralState.ACTIVE)
+    firewallPolicy = FirewallPolicy.create(request)
+    FirewallPolicy.waitStatus(firewallPolicy.id, GeneralState.ACTIVE)
 
     //create a load balancer
     var lbRequest = LoadbalancerRequest(
@@ -1594,8 +1578,8 @@ class Example {
     )
 
     println("creating load balancer ", loadBalancerName)
-    loadBalancer = Loadbalancer.createLoadbalancer(lbRequest)
-    Loadbalancer.waitLoadbalancerStatus(loadBalancer.id, GeneralState.ACTIVE)
+    loadBalancer = LoadBalancer.createLoadbalancer(lbRequest)
+    LoadBalancer.waitLoadbalancerStatus(loadBalancer.id, GeneralState.ACTIVE)
 
     //create and reserve a public ip
     var ipRequest = PublicIpRequest(
@@ -1603,8 +1587,8 @@ class Example {
     )
 
     println("creating a public ip")
-    exampleIp = PublicIp.createPublicIp(ipRequest)
-    PublicIp.waitPublicIpStatus(exampleIp.id, GeneralState.ACTIVE)
+    exampleIp = PublicIp.create(ipRequest)
+    PublicIp.waitStatus(exampleIp.id, GeneralState.ACTIVE)
 
     //create a server and assign the previously created resources
     var serverReq = ServerRequest(
@@ -1623,20 +1607,18 @@ class Example {
     )
     println("creating cloud example server", "example scala server")
     exampleServer = Server.createCloud(serverReq)
-    Server.waitServerStatus(exampleServer.id, ServerState.POWERED_ON)
+    Server.waitStatus(exampleServer.id, ServerState.POWERED_ON)
 
     println("Server information", Server.get(exampleServer.id))
 
     //cleanup
     Server.delete(exampleServer.id)
-    Server.waitServerDeleted(exampleServer.id)
+    Server.waitDeleted(exampleServer.id)
     FirewallPolicy.delete(firewallPolicy.id)
-    Loadbalancer.delete(loadBalancer.id)
+    LoadBalancer.delete(loadBalancer.id)
     PublicIp.delete(exampleIp.id)
 
   }
 
 }
-
-
 ```

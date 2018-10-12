@@ -25,17 +25,17 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
       Some(datacenters(0).id)
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
+    Server.waitStatus(fixedServer.id, ServerState.POWERED_ON)
   }
 
   override def afterAll(): Unit = {
     super.afterAll()
     if (fixedServer != null) {
       Server.delete(fixedServer.id)
-      Server.waitServerDeleted(fixedServer.id)
+      Server.waitDeleted(fixedServer.id)
     }
     if (testFP != null) {
-      FirewallPolicy.waitFirewallPolicyStatus(testFP.id, GeneralState.ACTIVE)
+      FirewallPolicy.waitStatus(testFP.id, GeneralState.ACTIVE)
       FirewallPolicy.delete(testFP.id)
     }
   }
@@ -49,8 +49,8 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
       )
     )
 
-    testFP = FirewallPolicy.createFirewallPolicy(request)
-    FirewallPolicy.waitFirewallPolicyStatus(testFP.id, GeneralState.ACTIVE)
+    testFP = FirewallPolicy.create(request)
+    FirewallPolicy.waitStatus(testFP.id, GeneralState.ACTIVE)
 
   }
 
@@ -70,9 +70,9 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
     var updateRequest = UpdateFirewallPolicyRequest(
       name = "new name scala test"
     )
-    var bs = FirewallPolicy.updateFirewallPolicy(testFP.id, updateRequest)
+    var bs = FirewallPolicy.update(testFP.id, updateRequest)
     assert(bs.name == "new name scala test")
-    FirewallPolicy.waitFirewallPolicyStatus(testFP.id, GeneralState.ACTIVE)
+    FirewallPolicy.waitStatus(testFP.id, GeneralState.ACTIVE)
   }
 
   test("Attach Firewall policy to server ip ") {
@@ -80,7 +80,7 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
     fixedServer = Server.get(fixedServer.id)
     var request = Seq(fixedServer.ips.get(0).id)
     var result  = FirewallPolicy.assignToServerIps(testFP.id, request)
-    FirewallPolicy.waitFirewallPolicyStatus(testFP.id, GeneralState.ACTIVE)
+    FirewallPolicy.waitStatus(testFP.id, GeneralState.ACTIVE)
     assert(result.serverIps.get.size > 0)
   }
 
@@ -102,7 +102,7 @@ class FirewallPolicyTest extends FunSuite with BeforeAndAfterAll {
     var result  = FirewallPolicy.assignRules(testFP.id, request)
     println(result.rules.get)
     testRule = result.rules.get(1)
-    FirewallPolicy.waitFirewallPolicyStatus(testFP.id, GeneralState.ACTIVE)
+    FirewallPolicy.waitStatus(testFP.id, GeneralState.ACTIVE)
     assert(result.rules.get.size > 1)
   }
 

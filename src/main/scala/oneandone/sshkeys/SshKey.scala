@@ -33,13 +33,13 @@ object SshKey extends Path {
     json.extract[SshKey]
   }
 
-  def createSshKey(request: CreateSshKeyRequest)(implicit client: OneandoneClient): SshKey = {
+  def create(request: CreateSshKeyRequest)(implicit client: OneandoneClient): SshKey = {
     val response = client.post(path, Extraction.decompose(request).snakizeKeys)
     val json     = parse(response).camelizeKeys
     json.extract[SshKey]
   }
 
-  def updateSshKey(id: String, request: UpdateSshKeyRequest)(
+  def update(id: String, request: UpdateSshKeyRequest)(
       implicit client: OneandoneClient
   ): SshKey = {
     val response = client.put(path :+ id, Extraction.decompose(request).snakizeKeys)
@@ -53,7 +53,7 @@ object SshKey extends Path {
     json.extract[SshKey]
   }
 
-  def waitSshKeyStatus(id: String, status: String)(
+  def waitStatus(id: String, status: String)(
       implicit client: OneandoneClient
   ): Boolean = {
     var response = client.get(path :+ id)

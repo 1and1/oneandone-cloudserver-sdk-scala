@@ -33,17 +33,17 @@ class RoleTest extends FunSuite {
   test("Create a Role") {
     var createRoleRequest = CreateRoleRequest("ScalaTestRole")
 
-    createdRole = Role.createRole(createRoleRequest)
-    assert(true == Role.waitRoleStatus(createdRole.id, "ACTIVE"))
+    createdRole = Role.create(createRoleRequest)
+    assert(true == Role.waitStatus(createdRole.id, "ACTIVE"))
   }
 
   test("Update a Role") {
     var updateRoleRequest = UpdateRoleRequest(
       name = Option("ScalaTestRoleUpdated")
     )
-    var updatedRole = Role.updateRole(createdRole.id, updateRoleRequest)
+    var updatedRole = Role.update(createdRole.id, updateRoleRequest)
     assert(updatedRole.name == "ScalaTestRoleUpdated")
-    Role.waitRoleStatus(updatedRole.id, "ACTIVE")
+    Role.waitStatus(updatedRole.id, "ACTIVE")
   }
 
   test("Update Role Permissions") {
@@ -70,10 +70,10 @@ class RoleTest extends FunSuite {
 
   test("Clone a Role") {
     var cloneRoleRequest = CloneRoleRequest("ClonedScalaTestRole")
-    clonedRole = Role.cloneRole(createdRole.id, cloneRoleRequest)
+    clonedRole = Role.clone(createdRole.id, cloneRoleRequest)
 
     assert(clonedRole != null)
-    assert(true == Role.waitRoleStatus(clonedRole.id, "ACTIVE"))
+    assert(true == Role.waitStatus(clonedRole.id, "ACTIVE"))
   }
 
   test("Delete a Role") {

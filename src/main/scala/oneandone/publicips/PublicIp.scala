@@ -54,14 +54,14 @@ object PublicIp extends oneandone.Path {
     json.extract[PublicIp]
   }
 
-  def createPublicIp(request: PublicIpRequest)(implicit client: OneandoneClient): PublicIp = {
+  def create(request: PublicIpRequest)(implicit client: OneandoneClient): PublicIp = {
 
     val response = client.post(path, Extraction.decompose(request).snakizeKeys)
     val json     = parse(response).camelizeKeys
     json.extract[PublicIp]
   }
 
-  def updatePublicIp(id: String, reverseDns: String)(
+  def update(id: String, reverseDns: String)(
       implicit client: OneandoneClient
   ): PublicIp = {
     var request  = ("reverse_dns" -> reverseDns)
@@ -76,7 +76,7 @@ object PublicIp extends oneandone.Path {
     json.extract[PublicIp]
   }
 
-  def waitPublicIpStatus(id: String, status: GeneralState)(
+  def waitStatus(id: String, status: GeneralState)(
       implicit client: OneandoneClient): Boolean = {
     var response = client.get(path :+ id)
     var json     = parse(response).camelizeKeys

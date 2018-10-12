@@ -39,7 +39,7 @@ object User extends oneandone.Path {
     json.extract[User]
   }
 
-  def createUser(
+  def create(
       request: CreateUserRequest
   )(implicit client: OneandoneClient): User = {
     val response = client.post(path, Extraction.decompose(request).snakizeKeys)
@@ -53,13 +53,13 @@ object User extends oneandone.Path {
     json.extract[User]
   }
 
-  def getUserApi(id: String)(implicit client: OneandoneClient): Api = {
+  def getApi(id: String)(implicit client: OneandoneClient): Api = {
     val response = client.get(path :+ id :+ UserApiPath)
     val json = parse(response).camelizeKeys
     json.extract[Api]
   }
 
-  def updateUserApi(
+  def updateApiStatus(
       userId: String,
       request: UpdateUserApiRequest
   )(implicit client: OneandoneClient): User = {
@@ -107,7 +107,7 @@ object User extends oneandone.Path {
     json.extract[Permission]
   }
 
-  def waitUserStatus(id: String, status: GeneralState)(
+  def waitStatus(id: String, status: GeneralState)(
       implicit client: OneandoneClient
   ): Boolean = {
     Thread.sleep(2000)

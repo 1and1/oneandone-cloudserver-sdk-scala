@@ -71,14 +71,14 @@ object Image extends oneandone.Path {
     json.extract[Image]
   }
 
-  def createImage(request: ImageRequest)(implicit client: OneandoneClient): Image = {
+  def create(request: ImageRequest)(implicit client: OneandoneClient): Image = {
 
     val response = client.post(path, Extraction.decompose(request).snakizeKeys)
     val json     = parse(response).camelizeKeys
     json.extract[Image]
   }
 
-  def updateImage(id: String, request: UpdateImageRequest)(
+  def update(id: String, request: UpdateImageRequest)(
       implicit client: OneandoneClient
   ): Image = {
 
@@ -93,7 +93,7 @@ object Image extends oneandone.Path {
     json.extract[Image]
   }
 
-  def waitImageStatus(id: String, status: String)(implicit client: OneandoneClient): Boolean = {
+  def waitStatus(id: String, status: String)(implicit client: OneandoneClient): Boolean = {
     var response = client.get(path :+ id)
     var json     = parse(response).camelizeKeys
     var img      = json.extract[Image]

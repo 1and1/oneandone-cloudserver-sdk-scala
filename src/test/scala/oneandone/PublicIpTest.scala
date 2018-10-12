@@ -19,8 +19,8 @@ class PublicIpTest extends FunSuite {
       `type` = Some(IPType.IPV4)
     )
 
-    testPublicIp = PublicIp.createPublicIp(request)
-    PublicIp.waitPublicIpStatus(testPublicIp.id, GeneralState.ACTIVE)
+    testPublicIp = PublicIp.create(request)
+    PublicIp.waitStatus(testPublicIp.id, GeneralState.ACTIVE)
 
   }
 
@@ -31,9 +31,9 @@ class PublicIpTest extends FunSuite {
 
   test("Update PublicIp") {
 
-    var publicIp = PublicIp.updatePublicIp(testPublicIp.id, "test.com")
+    var publicIp = PublicIp.update(testPublicIp.id, "test.com")
     assert(publicIp.reverseDns.get == "test.com")
-    PublicIp.waitPublicIpStatus(testPublicIp.id, GeneralState.ACTIVE)
+    PublicIp.waitStatus(testPublicIp.id, GeneralState.ACTIVE)
   }
 
   test("Delete PublicIp") {

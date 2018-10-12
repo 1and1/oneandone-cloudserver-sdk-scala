@@ -19,8 +19,8 @@ class VpnTest extends FunSuite {
       name = "vpn scala test"
     )
 
-    testVpn = Vpn.createVpn(request)
-    Vpn.waitVpnStatus(testVpn.id, GeneralState.ACTIVE)
+    testVpn = Vpn.create(request)
+    Vpn.waitStatus(testVpn.id, GeneralState.ACTIVE)
 
   }
 
@@ -37,9 +37,9 @@ class VpnTest extends FunSuite {
     var updateRequest = UpdateVpnRequest(
       name = Some("updated Name"),
     )
-    var vpn = Vpn.updateVpn(testVpn.id, updateRequest)
+    var vpn = Vpn.update(testVpn.id, updateRequest)
     assert(vpn.name == "updated Name")
-    Vpn.waitVpnStatus(testVpn.id, GeneralState.ACTIVE)
+    Vpn.waitStatus(testVpn.id, GeneralState.ACTIVE)
   }
 
   test("Delete Vpn") {

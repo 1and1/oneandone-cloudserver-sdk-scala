@@ -31,14 +31,14 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
       Some(datacenters(0).id)
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
+    Server.waitStatus(fixedServer.id, ServerState.POWERED_ON)
   }
 
   override def afterAll(): Unit = {
     super.afterAll()
     if (fixedServer != null) {
       Server.delete(fixedServer.id)
-      Server.waitServerDeleted(fixedServer.id)
+      Server.waitDeleted(fixedServer.id)
     }
   }
 
@@ -105,7 +105,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
       processes = Seq(processRequest)
     )
 
-    createdMonitoringPolicy = MonitoringPolicy.createMonitoringPolicy(createMonitoringPolicyRequest)
+    createdMonitoringPolicy = MonitoringPolicy.create(createMonitoringPolicyRequest)
 
     assert(createdMonitoringPolicy != null)
     assert(
@@ -188,7 +188,7 @@ class MonitoringPolicyTest extends FunSuite with BeforeAndAfterAll {
       processes = Seq(processRequest)
     )
 
-    updatedMonitoringPolicy = MonitoringPolicy.updateMonitoringPolicy(
+    updatedMonitoringPolicy = MonitoringPolicy.update(
       createdMonitoringPolicy.id,
       updateMonitoringPolicyRequest
     )

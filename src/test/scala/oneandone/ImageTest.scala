@@ -27,7 +27,7 @@ class ImageTest extends FunSuite {
       "753E3C1F859874AA74EB63B3302601F5"
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
+    Server.waitStatus(fixedServer.id, ServerState.POWERED_ON)
     var request = ImageRequest(
       serverId = fixedServer.id,
       name = "scala test image",
@@ -35,8 +35,8 @@ class ImageTest extends FunSuite {
       numImages = 1
     )
 
-    testImage = Image.createImage(request)
-    Image.waitImageStatus(testImage.id, "ENABLED")
+    testImage = Image.create(request)
+    Image.waitStatus(testImage.id, "ENABLED")
 
   }
 
@@ -48,10 +48,11 @@ class ImageTest extends FunSuite {
   test("Update Image") {
     var updateRequest = UpdateImageRequest(
       name = "updated Name",
+      frequency = Some(Frequency.ONCE)
     )
-    var image = Image.updateImage(testImage.id, updateRequest)
+    var image = Image.update(testImage.id, updateRequest)
     assert(image.name == "updated Name")
-    Image.waitImageStatus(testImage.id, "ENABLED")
+    Image.waitStatus(testImage.id, "ENABLED")
   }
 
   test("Delete Image") {

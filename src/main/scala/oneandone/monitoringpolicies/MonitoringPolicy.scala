@@ -41,7 +41,7 @@ object MonitoringPolicy extends Path {
     json.extract[MonitoringPolicy]
   }
 
-  def createMonitoringPolicy(
+  def create(
       request: MonitoringPolicyRequest
   )(implicit client: OneandoneClient): MonitoringPolicy = {
     val response = client.post(path, Extraction.decompose(request).snakizeKeys)
@@ -49,7 +49,7 @@ object MonitoringPolicy extends Path {
     json.extract[MonitoringPolicy]
   }
 
-  def updateMonitoringPolicy(
+  def update(
       id: String,
       request: MonitoringPolicyRequest
   )(implicit client: OneandoneClient): MonitoringPolicy = {

@@ -8,7 +8,7 @@ class Example {
   implicit val client                = oneandone.OneandoneClient(sys.env("ONEANDONE_TOKEN"))
   var datacenters                    = oneandone.datacenters.Datacenter.list()
   var firewallPolicy: FirewallPolicy = null
-  var loadBalancer: Loadbalancer     = null
+  var loadBalancer: LoadBalancer     = null
   var exampleIp: PublicIp            = null
   var exampleServer: Server          = null
   var firewallPolicyName             = "example policy"
@@ -25,8 +25,8 @@ class Example {
     )
 
     println("creating firewall policy ", firewallPolicyName)
-    firewallPolicy = FirewallPolicy.createFirewallPolicy(request)
-    FirewallPolicy.waitFirewallPolicyStatus(firewallPolicy.id, GeneralState.ACTIVE)
+    firewallPolicy = FirewallPolicy.create(request)
+    FirewallPolicy.waitStatus(firewallPolicy.id, GeneralState.ACTIVE)
 
     //create a load balancer
     var lbRequest = LoadbalancerRequest(
@@ -43,8 +43,8 @@ class Example {
     )
 
     println("creating load balancer ", loadBalancerName)
-    loadBalancer = Loadbalancer.createLoadbalancer(lbRequest)
-    Loadbalancer.waitLoadbalancerStatus(loadBalancer.id, GeneralState.ACTIVE)
+    loadBalancer = LoadBalancer.createLoadbalancer(lbRequest)
+    LoadBalancer.waitLoadbalancerStatus(loadBalancer.id, GeneralState.ACTIVE)
 
     //create and reserve a public ip
     var ipRequest = PublicIpRequest(
@@ -52,8 +52,8 @@ class Example {
     )
 
     println("creating a public ip")
-    exampleIp = PublicIp.createPublicIp(ipRequest)
-    PublicIp.waitPublicIpStatus(exampleIp.id, GeneralState.ACTIVE)
+    exampleIp = PublicIp.create(ipRequest)
+    PublicIp.waitStatus(exampleIp.id, GeneralState.ACTIVE)
 
     //create a server and assign the previously created resources
     var serverReq = ServerRequest(
@@ -72,15 +72,15 @@ class Example {
     )
     println("creating cloud example server", "example scala server")
     exampleServer = Server.createCloud(serverReq)
-    Server.waitServerStatus(exampleServer.id, ServerState.POWERED_ON)
+    Server.waitStatus(exampleServer.id, ServerState.POWERED_ON)
 
     println("Server information", Server.get(exampleServer.id))
 
     //cleanup
     Server.delete(exampleServer.id)
-    Server.waitServerDeleted(exampleServer.id)
+    Server.waitDeleted(exampleServer.id)
     FirewallPolicy.delete(firewallPolicy.id)
-    Loadbalancer.delete(loadBalancer.id)
+    LoadBalancer.delete(loadBalancer.id)
     PublicIp.delete(exampleIp.id)
 
   }
