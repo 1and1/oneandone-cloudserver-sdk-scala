@@ -1,7 +1,7 @@
 package oneandone.servers
 
 import oneandone.OneandoneClient
-import oneandone.privatenetworks.Privatenetwork
+import oneandone.privatenetworks.PrivateNetwork
 import oneandone.servers.ActionMethod.ActionMethod
 import oneandone.servers.ServerAction.ServerAction
 import oneandone.servers.ServerState.ServerState
@@ -97,7 +97,7 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def modifyServerInformation(id: String, name: String, description: String)(
+  def modifyInformation(id: String, name: String, description: String)(
       implicit client: OneandoneClient
   ): Server = {
     val request =
@@ -109,13 +109,13 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def getServerHardware(id: String)(implicit client: OneandoneClient): Hardware = {
+  def getHardware(id: String)(implicit client: OneandoneClient): Hardware = {
     val response = client.get(path :+ id :+ hardwarePath)
     val json     = parse(response).camelizeKeys
     json.extract[Hardware]
   }
 
-  def updateServerHardware(id: String, request: UpdateHardwareRequest)(
+  def updateHardware(id: String, request: UpdateHardwareRequest)(
       implicit client: OneandoneClient
   ): Server = {
     val response = client.put(path :+ id :+ hardwarePath, Extraction.decompose(request).snakizeKeys)
@@ -123,13 +123,13 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def getServerHdds(id: String)(implicit client: OneandoneClient): Seq[Hdds] = {
+  def getHdds(id: String)(implicit client: OneandoneClient): Seq[Hdds] = {
     val response = client.get(path :+ id :+ hddsPath)
     val json     = parse(response).camelizeKeys
     json.extract[Seq[Hdds]]
   }
 
-  def addHddToServer(id: String, requestBody: Seq[HddRequest])(
+  def addHdd(id: String, requestBody: Seq[HddRequest])(
       implicit client: OneandoneClient
   ): Server = {
     var request =
@@ -140,13 +140,13 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def getServersSingleHdd(id: String, hddId: String)(implicit client: OneandoneClient): Hdds = {
+  def getSingleHdd(id: String, hddId: String)(implicit client: OneandoneClient): Hdds = {
     val response = client.get(path :+ id :+ hddsPath :+ hddId)
     val json     = parse(response).camelizeKeys
     json.extract[Hdds]
   }
 
-  def updateServerSingleHdd(id: String, hddId: String, newSize: Int)(
+  def updateSingleHdd(id: String, hddId: String, newSize: Int)(
       implicit client: OneandoneClient
   ): Server = {
     val request =
@@ -157,13 +157,13 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def getServerImage(id: String)(implicit client: OneandoneClient): Image = {
+  def getImage(id: String)(implicit client: OneandoneClient): Image = {
     val response = client.get(path :+ id :+ serverImagePath)
     val json     = parse(response).camelizeKeys
     json.extract[Image]
   }
 
-  def reinstallServersImage(id: String, request: ReinstallImageRequest)(
+  def reinstallImage(id: String, request: ReinstallImageRequest)(
       implicit client: OneandoneClient
   ): Server = {
     val response =
@@ -172,13 +172,13 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def listServerIps(id: String)(implicit client: OneandoneClient): Seq[Ips] = {
+  def listIps(id: String)(implicit client: OneandoneClient): Seq[Ips] = {
     val response = client.get(path :+ id :+ serverIpsPath)
     val json     = parse(response).camelizeKeys
     json.extract[Seq[Ips]]
   }
 
-  def addNewIPToServer(id: String, protocol: String)(implicit client: OneandoneClient): Server = {
+  def addNewIP(id: String, protocol: String)(implicit client: OneandoneClient): Server = {
     var request =
       ("type" -> protocol)
     val response =
@@ -187,7 +187,7 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def getServerIp(id: String, ipId: String)(implicit client: OneandoneClient): Ips = {
+  def getIp(id: String, ipId: String)(implicit client: OneandoneClient): Ips = {
     val response = client.get(path :+ id :+ serverIpsPath :+ ipId)
     val json     = parse(response).camelizeKeys
     json.extract[Ips]
@@ -201,7 +201,7 @@ object Server extends oneandone.Path {
     json.extract[FirewallPolicy]
   }
 
-  def addFirewallPolicyToServer(id: String, ipId: String, fpId: String)(
+  def addFirewallPolicy(id: String, ipId: String, fpId: String)(
       implicit client: OneandoneClient
   ): Server = {
     val request =
@@ -223,7 +223,7 @@ object Server extends oneandone.Path {
     json.extract[Seq[LoadBalancer]]
   }
 
-  def addLoadBalancerToServer(id: String, ipId: String, lbId: String)(
+  def addLoadBalancer(id: String, ipId: String, lbId: String)(
       implicit client: OneandoneClient
   ): Server = {
     val request =
@@ -246,13 +246,13 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def getServerStauts(id: String)(implicit client: OneandoneClient): Status = {
+  def getStatus(id: String)(implicit client: OneandoneClient): Status = {
     val response = client.get(path :+ id :+ serverStatusPath)
     val json     = parse(response).camelizeKeys
     json.extract[Status]
   }
 
-  def getServerDvd(id: String)(implicit client: OneandoneClient): IdNameFields = {
+  def getDvd(id: String)(implicit client: OneandoneClient): IdNameFields = {
     val response = client.get(path :+ id :+ serverDvd)
     val json     = parse(response).camelizeKeys
     json.extract[IdNameFields]
@@ -301,10 +301,10 @@ object Server extends oneandone.Path {
 
   def getPrivateNetwork(id: String, pnId: String)(
       implicit client: OneandoneClient
-  ): Privatenetwork = {
+  ): PrivateNetwork = {
     val response = client.get(path :+ id :+ privateNetworksPath :+ pnId)
     val json     = parse(response).camelizeKeys
-    json.extract[Privatenetwork]
+    json.extract[PrivateNetwork]
   }
 
   def assignPrivateNetwork(id: String, pnId: String)(implicit client: OneandoneClient): Server = {
@@ -336,7 +336,7 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def cloneServer(id: String, request: CloneServerRequest)(
+  def clone(id: String, request: CloneServerRequest)(
       implicit client: OneandoneClient
   ): Server = {
     val response =
@@ -361,7 +361,7 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def deleteServerIp(id: String, ipId: String)(implicit client: OneandoneClient): Server = {
+  def deleteIp(id: String, ipId: String)(implicit client: OneandoneClient): Server = {
 
     val response =
       client.delete(path :+ id :+ serverIpsPath :+ ipId)
@@ -369,7 +369,7 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def deleteServerSingleHdd(id: String, hddId: String)(implicit client: OneandoneClient): Server = {
+  def deleteSingleHdd(id: String, hddId: String)(implicit client: OneandoneClient): Server = {
 
     val response =
       client.delete(path :+ id :+ hddsPath :+ hddId)
@@ -383,7 +383,7 @@ object Server extends oneandone.Path {
     json.extract[Server]
   }
 
-  def waitServerStatus(id: String, status: ServerState)(
+  def waitStatus(id: String, status: ServerState)(
       implicit client: OneandoneClient): Boolean = {
     var response = client.get(path :+ id)
     var json     = parse(response).camelizeKeys
@@ -398,7 +398,7 @@ object Server extends oneandone.Path {
   }
 
   //this method is required when some operations shows the correct status but the percentage is not 0 or null
-  def waitServerStatusAndPercentage(id: String, status: ServerState)(
+  def waitStatusAndPercentage(id: String, status: ServerState)(
       implicit client: OneandoneClient): Boolean = {
     var response = client.get(path :+ id)
     var json     = parse(response).camelizeKeys
@@ -412,7 +412,7 @@ object Server extends oneandone.Path {
     true
   }
 
-  def waitServerDeleted(
+  def waitDeleted(
       id: String
   )(implicit client: OneandoneClient): Boolean = {
     val path = this.path :+ id

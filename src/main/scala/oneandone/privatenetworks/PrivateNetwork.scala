@@ -6,7 +6,7 @@ import oneandone.servers.IdNameFields
 import org.json4s.Extraction
 import org.json4s.native.JsonMethods.parse
 
-case class Privatenetwork(
+case class PrivateNetwork(
     id: String,
     name: String,
     description: Option[String] = None,
@@ -18,60 +18,60 @@ case class Privatenetwork(
     servers: Option[Seq[IdNameFields]] = None,
 ) {}
 
-object Privatenetwork extends oneandone.Path {
+object PrivateNetwork extends oneandone.Path {
   override val path: Seq[String] = Seq("private_networks")
   var pnServersPath              = "servers"
 
   def list(
       queryParameters: Map[String, String] = Map.empty
-  )(implicit client: OneandoneClient): Seq[Privatenetwork] = {
+  )(implicit client: OneandoneClient): Seq[PrivateNetwork] = {
     val response = client.get(path, queryParameters)
     val json     = parse(response).camelizeKeys
-    json.extract[Seq[Privatenetwork]]
+    json.extract[Seq[PrivateNetwork]]
   }
 
-  def get(id: String)(implicit client: OneandoneClient): Privatenetwork = {
+  def get(id: String)(implicit client: OneandoneClient): PrivateNetwork = {
     val response = client.get(path :+ id)
     val json     = parse(response).camelizeKeys
-    json.extract[Privatenetwork]
+    json.extract[PrivateNetwork]
   }
 
-  def createPrivatenetwork(
+  def create(
       request: PrivateNetworkRequest
-  )(implicit client: OneandoneClient): Privatenetwork = {
+  )(implicit client: OneandoneClient): PrivateNetwork = {
 
     val response = client.post(path, Extraction.decompose(request).snakizeKeys)
     val json     = parse(response).camelizeKeys
-    json.extract[Privatenetwork]
+    json.extract[PrivateNetwork]
   }
 
-  def updatePrivatenetwork(id: String, request: UpdatePrivateNetworkRequest)(
+  def update(id: String, request: UpdatePrivateNetworkRequest)(
       implicit client: OneandoneClient
-  ): Privatenetwork = {
+  ): PrivateNetwork = {
 
     val response = client.put(path :+ id, Extraction.decompose(request).snakizeKeys)
     val json     = parse(response).camelizeKeys
-    json.extract[Privatenetwork]
+    json.extract[PrivateNetwork]
   }
 
   def attachServer(id: String, servers: Seq[String])(
       implicit client: OneandoneClient
-  ): Privatenetwork = {
+  ): PrivateNetwork = {
     val request =
       ("servers" ->
         servers)
     val response =
       client.post(path :+ id :+ pnServersPath, Extraction.decompose(request).snakizeKeys)
     val json = parse(response).camelizeKeys
-    json.extract[Privatenetwork]
+    json.extract[PrivateNetwork]
   }
 
   def detachServer(id: String, serverId: String)(
       implicit client: OneandoneClient
-  ): Privatenetwork = {
+  ): PrivateNetwork = {
     val response = client.delete(path :+ id :+ pnServersPath :+ serverId)
     val json     = parse(response).camelizeKeys
-    json.extract[Privatenetwork]
+    json.extract[PrivateNetwork]
   }
 
   def listServers(id: String)(
@@ -94,17 +94,17 @@ object Privatenetwork extends oneandone.Path {
     val response = client.delete(path :+ id)
   }
 
-  def waitPrivatenetworkStatus(id: String, status: GeneralState)(
+  def waitStatus(id: String, status: GeneralState)(
       implicit client: OneandoneClient
   ): Boolean = {
     var response = client.get(path :+ id)
     var json     = parse(response).camelizeKeys
-    var bs       = json.extract[Privatenetwork]
+    var bs       = json.extract[PrivateNetwork]
     while (bs.state != status) {
       Thread.sleep(8000)
       response = client.get(path :+ id)
       json = parse(response).camelizeKeys
-      bs = json.extract[Privatenetwork]
+      bs = json.extract[PrivateNetwork]
     }
     true
   }

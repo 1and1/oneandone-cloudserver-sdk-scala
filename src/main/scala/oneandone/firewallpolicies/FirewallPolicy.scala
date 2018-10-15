@@ -35,7 +35,7 @@ object FirewallPolicy extends oneandone.Path {
     json.extract[FirewallPolicy]
   }
 
-  def createFirewallPolicy(
+  def create(
       request: FirewallPolicyRequest
   )(implicit client: OneandoneClient): FirewallPolicy = {
 
@@ -44,7 +44,7 @@ object FirewallPolicy extends oneandone.Path {
     json.extract[FirewallPolicy]
   }
 
-  def updateFirewallPolicy(id: String, request: UpdateFirewallPolicyRequest)(
+  def update(id: String, request: UpdateFirewallPolicyRequest)(
       implicit client: OneandoneClient
   ): FirewallPolicy = {
 
@@ -130,7 +130,7 @@ object FirewallPolicy extends oneandone.Path {
     json.extract[FirewallPolicy]
   }
 
-  def waitFirewallPolicyStatus(id: String, status: GeneralState)(
+  def waitStatus(id: String, status: GeneralState)(
       implicit client: OneandoneClient
   ): Boolean = {
     var response = client.get(path :+ id)

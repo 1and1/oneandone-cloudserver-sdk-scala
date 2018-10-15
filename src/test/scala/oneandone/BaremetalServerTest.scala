@@ -45,7 +45,7 @@ class BaremetalServerTest extends FunSuite {
       applianceId = serverApplianceId
     )
     baremetalServer = Server.createBaremetal(request)
-    Server.waitServerStatus(baremetalServer.id, ServerState.POWERED_ON)
+    Server.waitStatus(baremetalServer.id, ServerState.POWERED_ON)
     assert(baremetalServer.hardware.baremetalModelId == Some(largeBaremetalInstance))
 
   }
@@ -53,8 +53,8 @@ class BaremetalServerTest extends FunSuite {
   test("Modify server information") {
     val updatedName = "custom server updated name"
     var modifiedServer =
-      Server.modifyServerInformation(baremetalServer.id, updatedName, updatedName)
-    Server.waitServerStatus(baremetalServer.id, ServerState.POWERED_ON)
+      Server.modifyInformation(baremetalServer.id, updatedName, updatedName)
+    Server.waitStatus(baremetalServer.id, ServerState.POWERED_ON)
     assert(modifiedServer.name == updatedName)
   }
 
@@ -64,60 +64,60 @@ class BaremetalServerTest extends FunSuite {
   }
 
   test("Get Server status") {
-    var server = Server.getServerStauts(baremetalServer.id)
+    var server = Server.getStatus(baremetalServer.id)
     assert(server.state == ServerState.POWERED_ON)
   }
 
   test("Stop Server") {
     var server = Server.updateStatus(baremetalServer.id, ServerAction.POWER_OFF, ActionMethod.SOFTWARE)
-    Server.waitServerStatus(baremetalServer.id, ServerState.POWERED_OFF)
+    Server.waitStatus(baremetalServer.id, ServerState.POWERED_OFF)
     server = Server.get(baremetalServer.id)
     assert(server.status.state == ServerState.POWERED_OFF)
   }
 
   test("Start Server") {
     var server = Server.updateStatus(baremetalServer.id, ServerAction.POWER_ON, ActionMethod.SOFTWARE)
-    Server.waitServerStatus(baremetalServer.id, ServerState.POWERED_ON)
+    Server.waitStatus(baremetalServer.id, ServerState.POWERED_ON)
     server = Server.get(baremetalServer.id)
     assert(server.status.state == ServerState.POWERED_ON)
   }
 
   test("Reboot Server") {
     var server = Server.updateStatus(baremetalServer.id, ServerAction.REBOOT, ActionMethod.SOFTWARE)
-    Server.waitServerStatus(baremetalServer.id, ServerState.POWERED_ON)
+    Server.waitStatus(baremetalServer.id, ServerState.POWERED_ON)
     server = Server.get(baremetalServer.id)
     assert(server.status.state == ServerState.POWERED_ON)
   }
 
   test("Get Server Hardware") {
-    var hardware = Server.getServerHardware(baremetalServer.id)
+    var hardware = Server.getHardware(baremetalServer.id)
     assert(hardware != null)
     assert(hardware.baremetalModelId == baremetalServer.hardware.baremetalModelId)
   }
 
   var ips: Seq[Ips] = null
   test("List server IPS") {
-    ips = Server.listServerIps(baremetalServer.id)
+    ips = Server.listIps(baremetalServer.id)
     assert(ips.size > 0)
   }
 
   test("Assign server IPS") {
-    Server.waitServerStatus(baremetalServer.id, ServerState.POWERED_ON)
-    var server = Server.addNewIPToServer(baremetalServer.id, "IPV4")
-    Server.waitServerStatus(baremetalServer.id, ServerState.POWERED_ON)
+    Server.waitStatus(baremetalServer.id, ServerState.POWERED_ON)
+    var server = Server.addNewIP(baremetalServer.id, "IPV4")
+    Server.waitStatus(baremetalServer.id, ServerState.POWERED_ON)
     assert(server.ips.size > 0)
   }
   var ip = ""
   test("Get server IPS") {
-    var ipsList = Server.listServerIps(baremetalServer.id)
+    var ipsList = Server.listIps(baremetalServer.id)
     var ipId    = ipsList(0).id
-    var ipData  = Server.getServerIp(baremetalServer.id, ipId)
+    var ipData  = Server.getIp(baremetalServer.id, ipId)
     ip = ipData.id
     assert(ip != null)
   }
 
   test("Remove Servers") {
-    Server.waitServerStatusAndPercentage(baremetalServer.id, ServerState.POWERED_ON)
+    Server.waitStatusAndPercentage(baremetalServer.id, ServerState.POWERED_ON)
     Server.delete(baremetalServer.id)
   }
 

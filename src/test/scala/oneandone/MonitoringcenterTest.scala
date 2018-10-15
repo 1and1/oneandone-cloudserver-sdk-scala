@@ -2,7 +2,7 @@ package oneandone
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
 
-import oneandone.monitoringcenters.{Monitoringcenter, Period}
+import oneandone.monitoringcenters.{MonitoringCenter, Period}
 import oneandone.monitoringpolicies._
 import oneandone.servers.{Hardware, Server, ServerRequest, ServerState}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
@@ -77,7 +77,7 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
       processes = Seq(processRequest)
     )
 
-    createdMonitoringPolicy = MonitoringPolicy.createMonitoringPolicy(createMonitoringPolicyRequest)
+    createdMonitoringPolicy = MonitoringPolicy.create(createMonitoringPolicyRequest)
     var serverRequest = ServerRequest(
       "Scala monitoring policy 2test",
       Some("desc"),
@@ -89,7 +89,7 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
       Some(datacenters(0).id)
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
+    Server.waitStatus(fixedServer.id, ServerState.POWERED_ON)
 
     MonitoringPolicy.addServers(createdMonitoringPolicy.id, AddServersRequest(Seq(fixedServer.id)))
   }
@@ -97,17 +97,17 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
   override def afterAll(): Unit = {
     super.afterAll()
     if (fixedServer != null) {
-      Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
+      Server.waitStatus(fixedServer.id, ServerState.POWERED_ON)
       Server.delete(fixedServer.id)
     }
     if (createdMonitoringPolicy != null) {
       MonitoringPolicy.delete(createdMonitoringPolicy.id)
     }
   }
-  var mcs: Seq[Monitoringcenter] = Seq.empty
+  var mcs: Seq[MonitoringCenter] = Seq.empty
 
   test("List monitoring policies") {
-    mcs = Monitoringcenter.list()
+    mcs = MonitoringCenter.list()
     assert(mcs != null)
   }
 
@@ -121,7 +121,7 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
     c.add(Calendar.DATE, 1)
     var tommorow = c.getTime()
 
-    var mc = Monitoringcenter.get(
+    var mc = MonitoringCenter.get(
       fixedServer.id,
       Period.CUSTOM,
       today,
@@ -132,7 +132,7 @@ class MonitoringcenterTest extends FunSuite with BeforeAndAfterAll {
 
   test("Get monitoring policy for server with fixed period") {
 
-    var mc = Monitoringcenter.get(
+    var mc = MonitoringCenter.get(
       fixedServer.id,
       Period.LAST_HOUR
     )

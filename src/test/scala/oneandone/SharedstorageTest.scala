@@ -5,10 +5,10 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
   implicit val client                    = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
-  var Sharedstorages: Seq[Sharedstorage] = Seq.empty
+  var Sharedstorages: Seq[SharedStorage] = Seq.empty
   var fixedServer: Server                = null
   val smallServerInstance: String        = "81504C620D98BCEBAA5202D145203B4B"
-  var testss: Sharedstorage              = null
+  var testss: SharedStorage              = null
   var datacenters                        = oneandone.datacenters.Datacenter.list()
 
   override def beforeAll(): Unit = {
@@ -24,7 +24,7 @@ class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
       Some(datacenters(0).id)
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
+    Server.waitStatus(fixedServer.id, ServerState.POWERED_ON)
   }
 
   test("Create Sharedstorage") {
@@ -35,18 +35,18 @@ class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
       datacenterId = Some(datacenters(0).id)
     )
 
-    testss = Sharedstorage.createSharedstorage(request)
-    Sharedstorage.waitSharedstorageStatus(testss.id, GeneralState.ACTIVE)
+    testss = SharedStorage.create(request)
+    SharedStorage.waitStatus(testss.id, GeneralState.ACTIVE)
 
   }
 
   test("List Sharedstorage") {
-    Sharedstorages = Sharedstorage.list()
+    Sharedstorages = SharedStorage.list()
     assert(Sharedstorages.size > 0)
   }
 
   test("Get Sharedstorage") {
-    var bs = Sharedstorage.get(testss.id)
+    var bs = SharedStorage.get(testss.id)
     assert(bs.id == testss.id)
   }
 
@@ -55,14 +55,14 @@ class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
       name = Some("updated name"),
       size = 100
     )
-    var bs = Sharedstorage.updateSharedstorage(testss.id, updateRequest)
+    var bs = SharedStorage.update(testss.id, updateRequest)
     assert(bs.name == "updated name")
-    Sharedstorage.waitSharedstorageStatus(testss.id, GeneralState.ACTIVE)
+    SharedStorage.waitStatus(testss.id, GeneralState.ACTIVE)
   }
 
   test("attach server") {
 
-    Sharedstorage.waitSharedstorageStatus(testss.id, GeneralState.ACTIVE)
+    SharedStorage.waitStatus(testss.id, GeneralState.ACTIVE)
     var request = AttachServersRequest(
       servers = Seq(
         sharedstorages.SharedStorageServerRequest(
@@ -71,42 +71,42 @@ class SharedstorageTest extends FunSuite with BeforeAndAfterAll {
         )
       )
     )
-    var ss = Sharedstorage.attachServer(testss.id, request)
+    var ss = SharedStorage.attachServer(testss.id, request)
     assert(ss.servers.size > 0)
-    Sharedstorage.waitSharedstorageStatus(testss.id, GeneralState.ACTIVE)
+    SharedStorage.waitStatus(testss.id, GeneralState.ACTIVE)
   }
 
   test("list attached servers") {
-    var ss = Sharedstorage.listAttachedServers(testss.id)
+    var ss = SharedStorage.listAttachedServers(testss.id)
     assert(ss.size > 0)
   }
 
   test("get attached server") {
-    var ss = Sharedstorage.getAttachedServers(testss.id, fixedServer.id)
+    var ss = SharedStorage.getAttachedServers(testss.id, fixedServer.id)
     assert(ss(0).id == fixedServer.id)
   }
 
   test("detach server") {
-    var bs = Sharedstorage.detachServer(testss.id, fixedServer.id)
+    var bs = SharedStorage.detachServer(testss.id, fixedServer.id)
     assert(bs.servers.get.size == 0)
-    Sharedstorage.waitSharedstorageStatus(testss.id, GeneralState.ACTIVE)
+    SharedStorage.waitStatus(testss.id, GeneralState.ACTIVE)
   }
 
   test("get access information") {
-    var ssA = Sharedstorage.getSharedstorageAccess(testss.id)
+    var ssA = SharedStorage.getAccessSettings(testss.id)
     assert(ssA != null)
   }
 
   test("change password") {
-    var ssA = Sharedstorage.updateSharedstoragePassword("test123!")
+    var ssA = SharedStorage.updatePassword("test123!")
     assert(ssA != null)
   }
 
   override def afterAll(): Unit = {
     super.afterAll()
     if (testss != null) {
-      Sharedstorage.waitSharedstorageStatus(testss.id, GeneralState.ACTIVE)
-      Sharedstorage.delete(testss.id)
+      SharedStorage.waitStatus(testss.id, GeneralState.ACTIVE)
+      SharedStorage.delete(testss.id)
     }
     if (fixedServer != null) {
       Server.delete(fixedServer.id)

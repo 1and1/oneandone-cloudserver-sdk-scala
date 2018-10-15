@@ -60,14 +60,14 @@ object Vpn extends oneandone.Path {
     try { stream.write(data) } finally if (stream != null) stream.close()
   }
 
-  def createVpn(request: VpnRequest)(implicit client: OneandoneClient): Vpn = {
+  def create(request: VpnRequest)(implicit client: OneandoneClient): Vpn = {
 
     val response = client.post(path, Extraction.decompose(request).snakizeKeys)
     val json     = parse(response).camelizeKeys
     json.extract[Vpn]
   }
 
-  def updateVpn(id: String, request: UpdateVpnRequest)(
+  def update(id: String, request: UpdateVpnRequest)(
       implicit client: OneandoneClient
   ): Vpn = {
 
@@ -82,7 +82,7 @@ object Vpn extends oneandone.Path {
     json.extract[Vpn]
   }
 
-  def waitVpnStatus(id: String, status: GeneralState)(implicit client: OneandoneClient): Boolean = {
+  def waitStatus(id: String, status: GeneralState)(implicit client: OneandoneClient): Boolean = {
     var response = client.get(path :+ id)
     var json     = parse(response).camelizeKeys
     var img      = json.extract[Vpn]

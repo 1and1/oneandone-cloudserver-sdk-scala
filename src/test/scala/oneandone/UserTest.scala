@@ -31,8 +31,8 @@ class UserTest extends FunSuite {
       email = Option("test@scala1cldsrvsdk.com")
     )
 
-    createdUser = User.createUser(createUserRequest)
-    assert(true == User.waitUserStatus(createdUser.id, GeneralState.ACTIVE))
+    createdUser = User.create(createUserRequest)
+    assert(true == User.waitStatus(createdUser.id, GeneralState.ACTIVE))
   }
 
   test("Get Current User Permissions") {

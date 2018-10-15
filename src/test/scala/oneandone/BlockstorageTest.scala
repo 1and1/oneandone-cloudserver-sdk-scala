@@ -1,6 +1,6 @@
 package oneandone
 import oneandone.blockstorages.{
-  Blockstorage,
+  BlockStorage,
   BlockstorageRequest,
   StorageState,
   UpdateBlockstorageRequest
@@ -10,10 +10,10 @@ import org.scalatest.FunSuite
 
 class BlockstorageTest extends FunSuite {
   implicit val client                  = OneandoneClient(sys.env("ONEANDONE_TOKEN"))
-  var blockStorages: Seq[Blockstorage] = Seq.empty
+  var blockStorages: Seq[BlockStorage] = Seq.empty
   var fixedServer: Server              = null
   val smallServerInstance: String      = "81504C620D98BCEBAA5202D145203B4B"
-  var testBs: Blockstorage             = null
+  var testBs: BlockStorage             = null
   var datacenters                      = oneandone.datacenters.Datacenter.list()
 
   test("Create Blockstorage") {
@@ -24,18 +24,18 @@ class BlockstorageTest extends FunSuite {
       datacenterId = datacenters(0).id
     )
 
-    testBs = Blockstorage.createBlockstorage(request)
-    Blockstorage.waitBlockstorageStatus(testBs.id, StorageState.POWERED_ON)
+    testBs = BlockStorage.create(request)
+    BlockStorage.waitStatus(testBs.id, StorageState.POWERED_ON)
 
   }
 
   test("List Blockstorage") {
-    blockStorages = Blockstorage.list()
+    blockStorages = BlockStorage.list()
     assert(blockStorages.size > 0)
   }
 
   test("Get Blockstorage") {
-    var bs = Blockstorage.get(testBs.id)
+    var bs = BlockStorage.get(testBs.id)
     assert(bs.id == testBs.id)
   }
 
@@ -52,35 +52,35 @@ class BlockstorageTest extends FunSuite {
       Some(datacenters(0).id)
     )
     fixedServer = Server.createCloud(serverRequest)
-    Server.waitServerStatus(fixedServer.id, ServerState.POWERED_ON)
+    Server.waitStatus(fixedServer.id, ServerState.POWERED_ON)
 
-    var bs = Blockstorage.attachServer(testBs.id, fixedServer.id)
+    var bs = BlockStorage.attachServer(testBs.id, fixedServer.id)
     assert(bs.server.get.id == fixedServer.id)
-    Blockstorage.waitBlockstorageStatus(testBs.id, StorageState.POWERED_ON)
+    BlockStorage.waitStatus(testBs.id, StorageState.POWERED_ON)
   }
 
   test("Get attached server") {
-    var bs = Blockstorage.getServer(testBs.id)
+    var bs = BlockStorage.getServer(testBs.id)
     assert(bs.id == fixedServer.id)
   }
 
   test("detach server") {
-    var bs = Blockstorage.detachServer(testBs.id)
+    var bs = BlockStorage.detachServer(testBs.id)
     assert(bs.server == None)
-    Blockstorage.waitBlockstorageStatus(testBs.id, StorageState.POWERED_ON)
+    BlockStorage.waitStatus(testBs.id, StorageState.POWERED_ON)
   }
 
   test("Update Blockstorage") {
     var updateRequest = UpdateBlockstorageRequest(
       name = Some("updated name")
     )
-    var bs = Blockstorage.updateBlockstorage(testBs.id, updateRequest)
+    var bs = BlockStorage.update(testBs.id, updateRequest)
     assert(bs.name == "updated name")
-    Blockstorage.waitBlockstorageStatus(testBs.id, StorageState.POWERED_ON)
+    BlockStorage.waitStatus(testBs.id, StorageState.POWERED_ON)
   }
 
   test("Delete Blockstorage") {
-    Blockstorage.delete(testBs.id)
+    BlockStorage.delete(testBs.id)
     Server.delete(fixedServer.id)
   }
 }
